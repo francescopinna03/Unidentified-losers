@@ -12,9 +12,13 @@ ALPHA = 0.10
 MU = np.ones(J) / J
 Y0 = [A[g] + L[g] * (np.arange(J) + 0.5) / J for g in range(3)]
 Y1 = [A[g] + D[g] + L[g] * (np.arange(J) + 0.5) / J for g in range(3)]
+def persistent_reference(kappa):
+    return (1 - kappa) * np.eye(J) / J + kappa * np.ones((J, J)) / J**2
+
+
 REFERENCES = {
     "independent": np.ones((J, J)) / J**2,
-    "persistent": (1 - KAPPA) * np.eye(J) / J + KAPPA * np.ones((J, J)) / J**2,
+    "persistent": persistent_reference(KAPPA),
 }
 
 
@@ -68,7 +72,7 @@ def unrestricted_plan(M):
 
 
 def worst_case(matrices, reference, radius):
-    r = REFERENCES[reference]
+    r = REFERENCES[reference] if isinstance(reference, str) else reference
     if radius == 0:
         plans = [r] * 3
         return float(W @ [np.sum(M * p) for M, p in zip(matrices, plans)]), plans
@@ -93,3 +97,8 @@ def worst_case(matrices, reference, radius):
 def unrestricted_value(matrices):
     plans = [unrestricted_plan(M) for M in matrices]
     return float(W @ [np.sum(M * p) for M, p in zip(matrices, plans)]), plans
+
+
+def reference_distance(kappa=KAPPA):
+    r = persistent_reference(kappa)
+    return kl(REFERENCES["independent"], r), kl(r, REFERENCES["independent"])

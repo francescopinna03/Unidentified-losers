@@ -2,11 +2,12 @@ import json
 import numpy as np
 from scipy.optimize import brentq
 from scipy.integrate import dblquad
-from model import W, L, D, ALPHA, KAPPA, REFERENCES, loss_matrix, shortfall_matrix, worst_case, unrestricted_value
+from model import W, L, D, ALPHA, KAPPA, REFERENCES, loss_matrix, shortfall_matrix, worst_case, unrestricted_value, persistent_reference, reference_distance
 
 ALLOWANCE = 2000.0
-PROGRAM_COSTS = [2000.0, 3000.0, 4000.0]
 TAX = 0.30
+EFFECTIVE = ALLOWANCE / (1 - TAX)
+PROGRAM_COSTS = [2000.0, 3000.0, 4000.0]
 EFFECT = 1529.0
 EFFECT_LOW = 1270.0
 EFFECT_HIGH = 1789.0
@@ -43,9 +44,9 @@ def topup_center_independent(p, g):
 def main():
     out = {"parameters": {"allowance": ALLOWANCE, "program_costs": PROGRAM_COSTS, "tax": TAX, "effect": EFFECT,
                           "effect_interval": [EFFECT_LOW, EFFECT_HIGH], "effect_population": EFFECT_POPULATION}}
-    out["continuous"] = {"no_allowance": continuous_shares(0.0), "allowance": continuous_shares(ALLOWANCE)}
-    losses = [loss_matrix(g, ALLOWANCE) for g in range(3)]
-    shortfalls = [shortfall_matrix(g, ALLOWANCE) for g in range(3)]
+    out["continuous"] = {"no_allowance": continuous_shares(0.0), "allowance": continuous_shares(EFFECTIVE)}
+    losses = [loss_matrix(g, EFFECTIVE) for g in range(3)]
+    shortfalls = [(1 - TAX) * shortfall_matrix(g, EFFECTIVE) for g in range(3)]
     curves = {}
     for ref in REFERENCES:
         curves[ref] = []
@@ -76,11 +77,26 @@ def main():
                           "mvpf_low": mvpf(allowance, cost, TAX, EFFECT_LOW)[0],
                           "mvpf_high": mvpf(allowance, cost, TAX, EFFECT_HIGH)[0]})
     out["mvpf"] = table
-    p = brentq(lambda q: topup_cost(q) - ALLOWANCE, 0.2, 0.99)
+    p = brentq(lambda q: (1 - TAX) * topup_cost(q) - ALLOWANCE, 0.2, 0.99)
     cells = [topup_center_independent(p, g) for g in range(3)]
     out["equal_outlay_topup"] = {"quantile": p, "dependence_free_cap": 1 - p, "center_independent_cells": cells,
                                  "center_independent_weighted": float(W @ cells),
                                  "center_persistent_weighted": float(KAPPA * (W @ cells))}
+    distance = reference_distance()
+    out["reference_distance"] = {"independent_to_persistent": distance[0], "persistent_to_independent": distance[1],
+                                 "breakdown_persistent_share": out["breakdown_persistent_10pct"] / distance[0],
+                                 "breakdown_independent_50pct_share": out["breakdown_independent_50pct"] / distance[0]}
+    kappas = {}
+    for kappa in [0.05, 0.10, 0.20]:
+        r = persistent_reference(kappa)
+        center = worst_case(losses, r, 0.0)[0]
+        if center < ALPHA:
+            breakdown = brentq(lambda x: worst_case(losses, r, x)[0] - ALPHA, 1e-4, 1.0, xtol=1e-6)
+        else:
+            breakdown = 0.0
+        kappas[str(kappa)] = {"center": center, "breakdown_10pct": breakdown,
+                              "breakdown_share_of_distance": breakdown / reference_distance(kappa)[0]}
+    out["kappa_sensitivity"] = kappas
     json.dump(out, open("../results/evaluation.json", "w"), indent=1)
 
 
