@@ -2,7 +2,7 @@ import json
 import numpy as np
 from scipy.optimize import brentq
 from scipy.integrate import dblquad
-from model import W, L, D, ALPHA, KAPPA, REFERENCES, loss_matrix, shortfall_matrix, worst_case, unrestricted_value, persistent_reference, reference_distance
+from model import W, L, A, D, ALPHA, KAPPA, REFERENCES, loss_matrix, shortfall_matrix, worst_case, unrestricted_value, persistent_reference, reference_distance
 
 ALLOWANCE = 2000.0
 TAX = 0.30
@@ -101,6 +101,17 @@ def main():
     out["continuous_shortfall_references"] = {"independent": independent_shortfall,
                                               "persistent": KAPPA * independent_shortfall,
                                               "per_loser": independent_shortfall / independent_share}
+
+    recipients = p - D / L
+    recipient_earnings = A + D + (p * L - D) / 2
+    base_mvpf, base_wtp, base_cost = mvpf(ALLOWANCE, 3000.0, TAX, EFFECT)
+    responses = {}
+    for reduction in [0.05, 0.10, 0.15]:
+        forgone = float(W @ (recipients * reduction * recipient_earnings))
+        responses[str(reduction)] = {"forgone_per_assigned": forgone, "mvpf": base_wtp / (base_cost + forgone)}
+    out["topup_behavioral"] = {"recipient_share": float(W @ recipients), "mvpf_static": base_mvpf,
+                                "mvpf_change_per_100": base_wtp / (base_cost + 100.0) - base_mvpf,
+                                "proportional_reductions": responses}
     distance = reference_distance()
     out["reference_distance"] = {"independent_to_persistent": distance[0], "persistent_to_independent": distance[1],
                                  "breakdown_persistent_share": out["breakdown_persistent_10pct"] / distance[0],
