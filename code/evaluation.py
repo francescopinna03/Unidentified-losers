@@ -82,6 +82,15 @@ def main():
     out["equal_outlay_topup"] = {"quantile": p, "dependence_free_cap": 1 - p, "center_independent_cells": cells,
                                  "center_independent_weighted": float(W @ cells),
                                  "center_persistent_weighted": float(KAPPA * (W @ cells))}
+
+    def unrestricted_shortfall(threshold):
+        s = (D + threshold) / L
+        return float(W @ ((1 - TAX) * L * (1 - s) ** 2 / 4))
+
+    out["continuous_shortfall_unrestricted"] = {"no_allowance": unrestricted_shortfall(0.0),
+                                                "allowance": unrestricted_shortfall(EFFECTIVE),
+                                                "topup": float(W @ ((1 - TAX) * L * (1 - p) ** 2 / 2)),
+                                                "topup_bound_attainable": bool(np.all(p - D / L >= 1 - p))}
     distance = reference_distance()
     out["reference_distance"] = {"independent_to_persistent": distance[0], "persistent_to_independent": distance[1],
                                  "breakdown_persistent_share": out["breakdown_persistent_10pct"] / distance[0],
