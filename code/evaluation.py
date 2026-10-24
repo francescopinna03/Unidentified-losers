@@ -91,6 +91,16 @@ def main():
                                                 "allowance": unrestricted_shortfall(EFFECTIVE),
                                                 "topup": float(W @ ((1 - TAX) * L * (1 - p) ** 2 / 2)),
                                                 "topup_bound_attainable": bool(np.all(p - D / L >= 1 - p))}
+
+    def reference_shortfall(threshold):
+        s = (D + threshold) / L
+        return float(W @ ((1 - TAX) * L * (1 - s) ** 3 / 6))
+
+    independent_shortfall = reference_shortfall(EFFECTIVE)
+    independent_share = float(W @ ((1 - (D + EFFECTIVE) / L) ** 2 / 2))
+    out["continuous_shortfall_references"] = {"independent": independent_shortfall,
+                                              "persistent": KAPPA * independent_shortfall,
+                                              "per_loser": independent_shortfall / independent_share}
     distance = reference_distance()
     out["reference_distance"] = {"independent_to_persistent": distance[0], "persistent_to_independent": distance[1],
                                  "breakdown_persistent_share": out["breakdown_persistent_10pct"] / distance[0],
