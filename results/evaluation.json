@@ -378,6 +378,11 @@
   "topup": 659.5786000792828,
   "topup_bound_attainable": true
  },
+ "continuous_shortfall_references": {
+  "independent": 851.9645055167128,
+  "persistent": 85.19645055167129,
+  "per_loser": 3283.813946266087
+ },
  "reference_distance": {
   "independent_to_persistent": 2.0857636930231545,
   "persistent_to_independent": 2.5975785463481014,
