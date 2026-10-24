@@ -372,6 +372,12 @@
   "center_independent_weighted": 0.24159716153901029,
   "center_persistent_weighted": 0.02415971615390103
  },
+ "continuous_shortfall_unrestricted": {
+  "no_allowance": 2474.0625,
+  "allowance": 1670.5902777777778,
+  "topup": 659.5786000792828,
+  "topup_bound_attainable": true
+ },
  "reference_distance": {
   "independent_to_persistent": 2.0857636930231545,
   "persistent_to_independent": 2.5975785463481014,
