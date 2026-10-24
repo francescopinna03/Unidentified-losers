@@ -383,6 +383,25 @@
   "persistent": 85.19645055167129,
   "per_loser": 3283.813946266087
  },
+ "topup_behavioral": {
+  "recipient_share": 0.5617781941495944,
+  "mvpf_static": 0.6760839407218198,
+  "mvpf_change_per_100": -0.0145666933988714,
+  "proportional_reductions": {
+   "0.05": {
+    "forgone_per_assigned": 458.6689536188385,
+    "mvpf": 0.6140638128918385
+   },
+   "0.1": {
+    "forgone_per_assigned": 917.337907237677,
+    "mvpf": 0.5624663244156661
+   },
+   "0.15": {
+    "forgone_per_assigned": 1376.0068608565155,
+    "mvpf": 0.5188678012138079
+   }
+  }
+ },
  "reference_distance": {
   "independent_to_persistent": 2.0857636930231545,
   "persistent_to_independent": 2.5975785463481014,
