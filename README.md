@@ -53,11 +53,12 @@ Every figure quoted in the paper is stored in one of the results files, under th
 | Shortfalls of €396 and €1,310 at 5% of the gap | `results/evaluation.json`, `severity` |
 | Worst shortfalls in Exhibit 3, from €2,474 to €660 | `results/evaluation.json`, `continuous_shortfall_unrestricted` |
 | Top-up at the 67th percentile with a cap of 33.2% | `results/evaluation.json`, `equal_outlay_topup` |
+| MVPF of the top-up under behavioral responses, with 56% of recipients, a fall of 0.015 per €100 and 0.56 | `results/evaluation.json`, `topup_behavioral` |
 | Distributional MVPF, from 0.66 to 1.30 across matchings | `results/welfare.json` |
 
 ## Versions
 
-Version 3.8, completed in October 2026 and submitted for the course Advanced Public Economics at LUISS Guido Carli.
+Version 3.9, completed in October 2026 and submitted for the course Advanced Public Economics at LUISS Guido Carli.
 
 ## Citation
 
