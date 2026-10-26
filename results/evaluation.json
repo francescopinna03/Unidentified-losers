@@ -12,7 +12,8 @@
    1270.0,
    1789.0
   ],
-  "effect_population": 1575.0
+  "effect_population": 1575.0,
+  "after_tax_gain_population": 1102.5
  },
  "continuous": {
   "no_allowance": {
@@ -412,17 +413,20 @@
   "0.05": {
    "center": 0.012348000000000001,
    "breakdown_10pct": 0.21981803334071479,
-   "breakdown_share_of_distance": 0.07995954647679893
+   "breakdown_share_of_distance": 0.07995954647679893,
+   "center_continuous": 0.012972179902053413
   },
   "0.1": {
    "center": 0.024696000000000003,
    "breakdown_10pct": 0.12046429465100893,
-   "breakdown_share_of_distance": 0.057755485462691686
+   "breakdown_share_of_distance": 0.057755485462691686,
+   "center_continuous": 0.025944359804106826
   },
   "0.2": {
    "center": 0.049392000000000005,
    "breakdown_10pct": 0.03886395881060303,
-   "breakdown_share_of_distance": 0.02727614836807639
+   "breakdown_share_of_distance": 0.02727614836807639,
+   "center_continuous": 0.05188871960821365
   }
  }
 }
