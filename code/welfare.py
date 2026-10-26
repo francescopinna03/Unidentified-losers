@@ -6,7 +6,7 @@ ALLOWANCE = 2000.0
 PROGRAM_COST = 3000.0
 TAX = 0.30
 EFFECTIVE = ALLOWANCE / (1 - TAX)
-EFFECT = 1529.0
+EFFECT = json.load(open("../results/pilot.json"))["overall"]["effect"]
 RADII = [0.0, 0.05, 0.10, 0.20]
 
 

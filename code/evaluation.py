@@ -8,10 +8,11 @@ ALLOWANCE = 2000.0
 TAX = 0.30
 EFFECTIVE = ALLOWANCE / (1 - TAX)
 PROGRAM_COSTS = [2000.0, 3000.0, 4000.0]
-EFFECT = 1529.0
-EFFECT_LOW = 1270.0
-EFFECT_HIGH = 1789.0
-EFFECT_POPULATION = 1575.0
+PILOT = json.load(open("../results/pilot.json"))["overall"]
+EFFECT = PILOT["effect"]
+EFFECT_LOW = PILOT["ci_low"]
+EFFECT_HIGH = PILOT["ci_high"]
+EFFECT_POPULATION = float(W @ D)
 RADII = [0.0, 0.005, 0.01, 0.02, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 0.8]
 
 
