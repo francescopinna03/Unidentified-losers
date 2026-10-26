@@ -126,7 +126,11 @@ def main():
             breakdown = 0.0
         kappas[str(kappa)] = {"center": center, "breakdown_10pct": breakdown,
                               "breakdown_share_of_distance": breakdown / reference_distance(kappa)[0]}
+    independent_continuous = out["continuous"]["allowance"]["independent"]["weighted"]
+    for key in kappas:
+        kappas[key]["center_continuous"] = float(key) * independent_continuous
     out["kappa_sensitivity"] = kappas
+    out["parameters"]["after_tax_gain_population"] = (1 - TAX) * EFFECT_POPULATION
     json.dump(out, open("../results/evaluation.json", "w"), indent=1)
 
 
