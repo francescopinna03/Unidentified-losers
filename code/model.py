@@ -78,8 +78,8 @@ def worst_case(matrices, reference, radius):
         return float(W @ [np.sum(M * p) for M, p in zip(matrices, plans)]), plans
     scale = max(1.0, max(M.max() - M.min() for M in matrices))
 
-    def at(lam):
-        plans = [sinkhorn(M, r, lam) for M in matrices]
+    def at(lam, iters=4000):
+        plans = [sinkhorn(M, r, lam, iters=iters) for M in matrices]
         value = float(W @ [np.sum(M * p) for M, p in zip(matrices, plans)])
         budget = float(W @ [kl(p, r) for p in plans])
         return value, budget, plans
@@ -87,8 +87,29 @@ def worst_case(matrices, reference, radius):
     lam_low = 0.012 * scale
     value, budget, plans = at(lam_low)
     if budget <= radius:
-        plans = [unrestricted_plan(M) for M in matrices]
-        return float(W @ [np.sum(M * p) for M, p in zip(matrices, plans)]), plans
+        free = [unrestricted_plan(M) for M in matrices]
+        free_value = float(W @ [np.sum(M * p) for M, p in zip(matrices, free)])
+        free_budget = float(W @ [kl(p, r) for p in free])
+        if free_budget <= radius:
+            return free_value, free
+        lam_high = lam_low
+        inner = (value, budget, plans)
+        lam_try = lam_low
+        for _ in range(16):
+            lam_try = 0.7 * lam_try
+            value, budget, plans = at(lam_try, 40000)
+            if max(abs(p.sum(1) - MU).max() for p in plans) > 1e-9:
+                break
+            if budget > radius:
+                lam = brentq(lambda x: at(x, 40000)[1] - radius, lam_try, lam_high, xtol=1e-8)
+                value, budget, plans = at(lam, 40000)
+                return value, plans
+            lam_high = lam_try
+            inner = (value, budget, plans)
+        value, budget, plans = inner
+        t = (radius - budget) / (free_budget - budget)
+        plans = [(1 - t) * p + t * q for p, q in zip(plans, free)]
+        return (1 - t) * value + t * free_value, plans
     lam = brentq(lambda x: at(x)[1] - radius, lam_low, 5000.0 * scale, xtol=1e-8)
     value, budget, plans = at(lam)
     return value, plans
