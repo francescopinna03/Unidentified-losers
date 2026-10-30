@@ -72,16 +72,20 @@ def unrestricted_plan(M):
 
 
 def worst_case(matrices, reference, radius):
-    r = REFERENCES[reference] if isinstance(reference, str) else reference
+    if isinstance(reference, str):
+        refs = [REFERENCES[reference]] * 3
+    elif isinstance(reference, list):
+        refs = reference
+    else:
+        refs = [reference] * 3
     if radius == 0:
-        plans = [r] * 3
-        return float(W @ [np.sum(M * p) for M, p in zip(matrices, plans)]), plans
+        return float(W @ [np.sum(M * r) for M, r in zip(matrices, refs)]), refs
     scale = max(1.0, max(M.max() - M.min() for M in matrices))
 
     def at(lam, iters=4000):
-        plans = [sinkhorn(M, r, lam, iters=iters) for M in matrices]
+        plans = [sinkhorn(M, r, lam, iters=iters) for M, r in zip(matrices, refs)]
         value = float(W @ [np.sum(M * p) for M, p in zip(matrices, plans)])
-        budget = float(W @ [kl(p, r) for p in plans])
+        budget = float(W @ [kl(p, r) for p, r in zip(plans, refs)])
         return value, budget, plans
 
     lam_low = 0.012 * scale
@@ -89,7 +93,7 @@ def worst_case(matrices, reference, radius):
     if budget <= radius:
         free = [unrestricted_plan(M) for M in matrices]
         free_value = float(W @ [np.sum(M * p) for M, p in zip(matrices, free)])
-        free_budget = float(W @ [kl(p, r) for p in free])
+        free_budget = float(W @ [kl(p, r) for p, r in zip(free, refs)])
         if free_budget <= radius:
             return free_value, free
         lam_high = lam_low
