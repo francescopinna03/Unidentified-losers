@@ -1,0 +1,31 @@
+{
+ "radius": 0.1,
+ "persistent": {
+  "aggregate_worst_case": 0.0920548125540131,
+  "cells_in_aggregate_worst_case": [
+   0.06129951682846083,
+   0.10063764441087258,
+   0.12924732111529344
+  ],
+  "separate_cell_maxima": [
+   0.11729823616161304,
+   0.15939711388099734,
+   0.21353443716027465
+  ],
+  "weighted_sum_of_separate_maxima": 0.15609189361306294
+ },
+ "independent": {
+  "aggregate_worst_case": 0.36845707971748265,
+  "cells_in_aggregate_worst_case": [
+   0.27902386473788915,
+   0.40039138754561177,
+   0.4668421927254516
+  ],
+  "separate_cell_maxima": [
+   0.3486551549297515,
+   0.47980485219959756,
+   0.5809480945488619
+  ],
+  "weighted_sum_of_separate_maxima": 0.4526307838789752
+ }
+}
