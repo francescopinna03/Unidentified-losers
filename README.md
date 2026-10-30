@@ -101,7 +101,7 @@ Every figure quoted in the paper is stored in one of the results files, under th
 
 ## Versions
 
-Version submitted on 29 October 2026 for the course Advanced Public Economics at LUISS Guido Carli.
+Version submitted on 29 October 2026 for the course Advanced Public Economics at LUISS Guido Carli. The repository as it stood at submission, which contains the paper and its replication material only, is the state tagged `submission`, and everything added afterwards, the technical notes with their code and results, lies outside the submitted work.
 
 ## Citation
 
