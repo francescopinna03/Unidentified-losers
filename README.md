@@ -19,7 +19,10 @@ The paper, its source and its two figures are in `paper/`, the synthetic lottery
 | `code/evaluation.py` | Shares of losers, breakdown points, shortfalls, MVPF and equal-outlay top-up |
 | `code/welfare.py` | Distributional MVPF |
 | `code/exhibits.py` | Exhibits 1 and 2 |
-| `results/` | Values cited in the paper |
+| `results/` | Values cited in the paper and in the notes |
+| `notes/notes.pdf`, `notes/notes.tex` | Technical notes on the entropic extension, with their source |
+| `data/synthetic_panel.csv` | Synthetic pre-program earnings panel used in the notes |
+| `code/sandwich.py`, `code/bridge.py`, `code/persistent_bridge.py`, `code/incidence.py`, `code/panel.py`, `code/mobility.py` | Computations of the notes |
 
 ## Data
 
@@ -57,6 +60,25 @@ pdflatex paper.tex
 ```
 
 Since the scripts are deterministic, they rewrite `data/` and `results/` with identical files, while the figures are drawn in Latin Modern when that font is installed and in another serif font otherwise.
+
+## Technical notes
+
+The notes in `notes/` develop the entropic machinery that the paper uses in its simplest form, with proofs, a closed-form solution for the worst case under the independent scenario, a continuum solution under the persistent one, the design of transfers that depend on realized earnings, and the calibration of the reference scenario from earnings mobility observed before the program. They open with a guide for readers of the paper, which says where each number of the paper comes from and which sections an economist can skip. Their computations rerun in about two minutes with the following commands, after those of the paper, and write their results to `results/`.
+
+```
+cd code
+python sandwich.py
+python bridge.py
+python persistent_bridge.py
+python incidence.py
+python panel.py
+python mobility.py
+cd ../notes
+pdflatex notes.tex
+pdflatex notes.tex
+```
+
+The synthetic panel in `data/synthetic_panel.csv` holds, for the 6,000 applicants of the pilot, pre-tax earnings in the two years before the program, drawn within each cell from the persistent scenario at a reshuffled share of 10% with seed 20261024, so that the pre-program rank correlation can be used to estimate that share. The script `code/panel.py` regenerates the file byte for byte.
 
 ## Provenance of the reported values
 
