@@ -1,0 +1,686 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{lmodern,microtype,amsmath,amssymb,amsthm,booktabs,geometry}
+\usepackage[hidelinks]{hyperref}
+\geometry{margin=2.5cm}
+\newtheoremstyle{notesplain}{\topsep}{\topsep}{\itshape}{}{\bfseries}{}{ }{\thmname{#1}\thmnumber{ #2}.\thmnote{ \mdseries(#3).}}
+\newtheoremstyle{notesupright}{\topsep}{\topsep}{\normalfont}{}{\bfseries}{}{ }{\thmname{#1}\thmnumber{ #2}.\thmnote{ \mdseries(#3).}}
+\theoremstyle{notesplain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{notesupright}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+\newcommand{\comments}{\par\smallskip\noindent\textbf{Comments.}\ }
+\newcommand{\KL}{\mathrm{KL}}
+\newcommand{\E}{\mathbb{E}}
+\title{Some ideas on entropic bounds\\for the evaluation of unidentified losers}
+\author{Francesco Pinna\thanks{Department of Economics and Finance, LUISS Guido Carli. Email: francesco.pinna@studenti.luiss.it. These notes collect the technical side of the policy paper \emph{Evaluating a Retraining Program When Its Losers Are Unidentified}, and the code and results that reproduce every number in them are in the same repository as the paper, at github.com/francescopinna03/Unidentified-losers. All remaining errors are my own.}}
+\date{Notes, 30 October 2026}
+\begin{document}
+\maketitle
+
+\noindent A lottery of the offer of a program identifies the law of an outcome with the program and the law without it, while the joint law of the two outcomes for the same person stays out of reach, because every person is observed in one arm only, so that whatever one wants to say about who gains and who loses is a statement about a coupling of two known marginals. The idea pursued in these pages is to restrict that coupling to a Kullback-Leibler ball around a reference declared in advance and to study the worst case inside the ball as the radius grows, which turns an unidentified quantity into a function of one declared number and makes the sensitivity of every evaluative claim explicit. The first part sets up the mathematics in some generality and proves what can be proved, the second goes back to the evaluation problem and to the synthetic benchmark of the policy paper and looks at what the results say there, and a few words on the literature close the notes.
+
+\section*{A guide for readers of the policy paper}
+A reader who comes from the policy paper and wants to know where its numbers come from, or what they rest on, does not need the whole of these notes. The paper reports three shares of losers under declared scenarios, a radius at which each claim breaks, an incidence by cell, a weighted welfare measure, an equal-outlay top-up with a guaranteed cap, and a fiscal externality for that top-up. Part II takes these objects one at a time and says exactly how each is computed and under which assumptions, and it can be read with the definitions of Section \ref{sec:setting} alone, since every proof and every closed form lives in Part I and is only quoted there.
+
+The shares of losers and the breakdown radii are in Section \ref{sec:losers}, which also explains why the paper's $5.8\%$ becomes $4.9\%$ on the continuum and why the grid used in the paper is slightly optimistic. The same section separates two incidence objects that the paper's Exhibit 2 could confuse, the shares by cell in the aggregate worst case and the separate worst case of each cell, and reports both. The top-up is in Sections \ref{sec:instruments} and \ref{sec:externality}, the first for the guarantee and what it rests on, the second for the fiscal externality, where the willingness to pay is shown to be unchanged to first order and every euro of gross earnings forgone by a recipient is shown to cost the government one euro. The meaning of the radius, and the reason why no sample from the lottery could ever pin it down, are in Sections \ref{sec:problem} and \ref{sec:calibration}, the latter with the proposal to anchor the reference to the earnings mobility observed before the program.
+
+Part I is for a reader who wants the theory. Sections \ref{sec:duality} to \ref{sec:sandwich} give the general machinery, Sections \ref{sec:exact} and \ref{sec:mixture} solve the problem for the loss indicator, with a closed form under the product reference and a one-dimensional fixed point under the mixture, and Sections \ref{sec:design} and \ref{sec:estimation} treat the design of transfers and the estimation of a reference, and Section \ref{sec:open} collects the open directions.
+
+\section*{Part I. The mathematical framework}
+The starting idea is to treat every statement about gains and losses as a linear functional of a coupling, and to look at its worst case when the coupling is allowed to move away from a declared reference by a given amount of relative entropy. Before giving precise statements, we outline the path, which should be read as a rough roadmap. Section \ref{sec:setting} sets up the objects, and Section \ref{sec:duality} recalls the duality that turns the worst case into a Schrödinger bridge, together with certificates that bracket every computed value. Section \ref{sec:sandwich} gives a bound valid at every radius for any payoff, and Section \ref{sec:extremal} looks at the extreme couplings when nothing restricts them. Sections \ref{sec:exact} and \ref{sec:mixture} solve the problem for the payoff that matters most, the indicator of a loss, first under the product reference in closed form and then under the mixture through a fixed point. Section \ref{sec:design} changes the point of view and lets the transfer depend on the realized outcome, and Section \ref{sec:estimation} asks what happens when the reference is estimated.
+
+\section{Setting and notation}
+\label{sec:setting}
+We fix a finite number $G$ of cells, indexed by $g$, with population weights $\omega_g>0$ that sum to one. In each cell there are two probability laws, the law of the outcome without the program and the law of the outcome with it. In the discrete case the first one is a probability vector $\mu_g$ of length $J_{0g}$, carried by the points $y^0_{g1}<\dots<y^0_{gJ_{0g}}$, and the second one a probability vector $\nu_g$ of length $J_{1g}$, carried by the points $y^1_{g1}<\dots<y^1_{gJ_{1g}}$. A coupling of the two is a nonnegative matrix $\gamma_g$ of size $J_{0g}\times J_{1g}$ whose row sums are $\mu_g$ and whose column sums are $\nu_g$, and we write $\Pi(\mu_g,\nu_g)$ for the set of couplings, which is a convex polytope. In the continuous case the same objects are laws on the real line, and a coupling is a law on the plane with the two given marginals. We move between the two cases freely, writing sums in the discrete case and leaving the obvious integrals to the reader.\footnote{This is a bit sloppy, but harmless here, since every statement below is made either on a finite grid or for uniform laws, where the integrals are elementary.}
+
+\begin{definition}[References]
+\label{def:references}
+The product reference of cell $g$ is the matrix $R^{\mathrm{ind}}_g=\mu_g\nu_g^\top$, under which the two outcomes are independent. The rank reference $R^{\mathrm{rank}}_g$ is the comonotone coupling, which matches equal quantiles of the two marginals. For a reshuffled share $\kappa\in(0,1]$ the mixture reference is
+\begin{equation}
+R^{(\kappa)}_g=(1-\kappa)R^{\mathrm{rank}}_g+\kappa R^{\mathrm{ind}}_g.
+\end{equation}
+\end{definition}
+
+A reference is a coupling that the analyst declares before looking at the results. The product reference says that the program reshuffles the ranking of people completely, the rank reference says that it leaves the ranking intact, and the mixture says that a share $\kappa$ of people is reshuffled at random while the others keep their rank. In the discrete case with equal grids the mixture is strictly positive. In the continuous case it has a singular part on the diagonal, which matters in Section \ref{sec:mixture}.
+
+\begin{definition}[Divergence and admissible set]
+\label{def:ball}
+The divergence of a coupling $\gamma_g$ from a reference $R_g$ is $\KL(\gamma_g\|R_g)=\sum_{ij}\gamma_{g,ij}\log(\gamma_{g,ij}/R_{g,ij})$, with $0\log0=0$ and the value $+\infty$ when $\gamma_g$ charges an entry where $R_g$ vanishes. For a radius $\delta\ge0$ the admissible set is
+\begin{equation}
+\mathcal U_\delta(R)=\Big\{(\gamma_g)_{g}\,:\,\gamma_g\in\Pi(\mu_g,\nu_g),\ \sum_g\omega_g\KL(\gamma_g\|R_g)\le\delta\Big\}.
+\label{eq:ball}
+\end{equation}
+\end{definition}
+
+The budget is global, so it may be spent in one cell only. This is the right choice when we want to know how bad things can get for a single group of people, and it is the source of the incidence statements of Section \ref{sec:losers}.
+
+\begin{definition}[Payoffs and worst cases]
+\label{def:worst}
+A payoff is a collection of bounded real matrices $Z_g$ of size $J_{0g}\times J_{1g}$, and its linear functional is $\Lambda(\gamma)=\sum_g\omega_g\langle Z_g,\gamma_g\rangle$ with $\langle Z,\gamma\rangle=\sum_{ij}Z_{ij}\gamma_{ij}$. The reference value, the worst case at radius $\delta$ and the unrestricted value are
+\begin{equation}
+H_0(Z;R)=\sum_g\omega_g\langle Z_g,R_g\rangle,\qquad
+H_\delta(Z;R)=\max_{\gamma\in\mathcal U_\delta(R)}\Lambda(\gamma),\qquad
+H_\infty(Z)=\max_{\gamma_g\in\Pi(\mu_g,\nu_g)}\Lambda(\gamma),
+\label{eq:worst}
+\end{equation}
+and the identified interval of $\Lambda$ at radius $\delta$ is $[-H_\delta(-Z;R),\,H_\delta(Z;R)]$.
+\end{definition}
+
+Three payoffs come back throughout, all built on a transfer $b_g\ge0$ paid on top of the treated outcome, and the indicator of a strict loss is $Z_{g,ij}=\mathbf 1\{y^1_{gj}+b_g<y^0_{gi}\}$, the shortfall is $Z_{g,ij}=(y^0_{gi}-y^1_{gj}-b_g)_+$, and a welfare-weighted gain with a weight $w$ evaluated at the counterfactual is $Z_{g,ij}=w(y^0_{gi})\,y^1_{gj}$. The first one counts heads, the second counts euros, and the third is the only part of a weighted gain that depends on the coupling, as Lemma \ref{lem:additive} below makes precise.
+
+\section{Duality, bridges and certificates}
+\label{sec:duality}
+We collect here the standard facts on the worst case, with short proofs, since everything later rests on them. Let us start with the shape of the curve $\delta\mapsto H_\delta$.
+
+\begin{proposition}[Shape of the worst-case curve]
+\label{prop:shape}
+Let every reference be strictly positive. Then $\delta\mapsto H_\delta(Z;R)$ is nondecreasing, concave and continuous on $[0,\infty)$, it equals $H_0$ at $\delta=0$, and it equals $H_\infty$ for every $\delta$ larger than a finite radius $\delta_\infty$.
+\end{proposition}
+
+Positivity of the reference matters only for the last claim, and it fails for the rank coupling, from which every other coupling has infinite divergence, so that the ball around it contains the reference alone at every radius.
+
+\begin{proof}
+The admissible sets are nested, which gives monotonicity. Take $\gamma'$ admissible at $\delta_1$ and $\gamma''$ admissible at $\delta_2$. By joint convexity of the divergence, the convex combination $t\gamma'+(1-t)\gamma''$ is admissible at $t\delta_1+(1-t)\delta_2$, and $\Lambda$ is linear, so the curve is concave. At $\delta=0$ the only admissible collection is the reference itself, since the divergence vanishes only there. A positive reference gives finite divergence to every coupling, so a maximizer of the unrestricted problem has finite weighted divergence $\delta_\infty$ and the curve is flat beyond it. Concavity gives continuity on the open half line, and continuity at zero follows from compactness of the polytopes and continuity of the divergence on them.
+\end{proof}
+
+\begin{proposition}[Dual representation and bridge form]
+\label{prop:dual}
+For $\delta>0$,
+\begin{equation}
+H_\delta(Z;R)=\inf_{\lambda\ge0}\Big\{\lambda\delta+\sum_g\omega_g V_g(\lambda)\Big\},\qquad V_g(\lambda)=\max_{\gamma_g\in\Pi(\mu_g,\nu_g)}\big\{\langle Z_g,\gamma_g\rangle-\lambda\KL(\gamma_g\|R_g)\big\}.
+\label{eq:dual}
+\end{equation}
+For $\lambda>0$ the inner maximizer is unique and has the form $\gamma^\lambda_{g,ij}=u_{g,i}\,R_{g,ij}\,e^{Z_{g,ij}/\lambda}\,v_{g,j}$, with positive vectors $u_g$ and $v_g$ fixed by the two marginals. When the divergence constraint binds, the optimal multiplier solves $\sum_g\omega_g\KL(\gamma^\lambda_g\|R_g)=\delta$.
+\end{proposition}
+
+\begin{proof}
+We maximize a linear function over the intersection of a product of polytopes with a convex sublevel set, and the reference is a Slater point because its divergence is zero and $\delta>0$. Lagrangian duality for the divergence constraint therefore holds with no gap and gives \eqref{eq:dual}. For $\lambda>0$ the inner problem maximizes a strictly concave function on $\Pi(\mu_g,\nu_g)$, and up to a constant it is the minimization of the divergence from the tilted kernel $R_ge^{Z_g/\lambda}$, which is the information projection of Csiszár \cite{csiszar}. The first-order conditions with multipliers for the row and column sums give the product form, and the scaling algorithm of Sinkhorn \cite{sinkhorn} computes the two vectors. Complementary slackness gives the condition on the multiplier.
+\end{proof}
+
+The maximizer is a static Schrödinger bridge with kernel $R_ge^{Z_g/\lambda}$.\footnote{Schrödinger's original question concerned a cloud of diffusing particles observed at two times. The static problem used here is its two-time marginal.} It is the ``most likely'' way, under the reference, to move from one marginal to the other once the payoff is allowed to tilt the reference. The multiplier $\lambda$ is the price of the divergence, and $\theta=1/\lambda$ plays the role of the robustness parameter of Hansen and Sargent \cite{hansensargent2008}. We shall often parametrize the worst case by $\theta$ and invert the divergence afterwards.\footnote{It is a matter of taste whether to work with $\lambda$ or with $\theta$. The second one is more natural when the worst case is read as an exponential tilt.} We anticipate that for the loss indicator under the product reference the two scaling vectors can be written down explicitly, which is the content of Section \ref{sec:exact}.
+
+\begin{proposition}[Certificates]
+\label{prop:certificates}
+For every $\lambda>0$ and every pair of vectors $\phi_g$ of length $J_{0g}$ and $\psi_g$ of length $J_{1g}$,
+\begin{equation}
+V_g(\lambda)\le\mu_g^\top\phi_g+\nu_g^\top\psi_g+\lambda\sum_{ij}R_{g,ij}\Big[\exp\Big(\frac{Z_{g,ij}-\phi_{g,i}-\psi_{g,j}}{\lambda}\Big)-1\Big],
+\label{eq:certificate}
+\end{equation}
+so that $\lambda\delta+\sum_g\omega_g$ times the right side is an upper bound on $H_\delta$ for any such choice, while $\Lambda(\gamma)$ is a lower bound for every admissible $\gamma$.
+\end{proposition}
+
+\begin{proof}
+For $\gamma_g\in\Pi(\mu_g,\nu_g)$ both $\gamma_g$ and $R_g$ have total mass one, so the divergence equals $\sum_{ij}[\gamma\log(\gamma/R)-\gamma+R]$. Adding and subtracting $\langle\phi_g\oplus\psi_g,\gamma_g\rangle=\mu_g^\top\phi_g+\nu_g^\top\psi_g$ and dropping the marginal constraints, the inner objective is bounded by the supremum over all nonnegative matrices of $\langle Z_g-\phi_g\oplus\psi_g,\gamma\rangle-\lambda\sum_{ij}[\gamma\log(\gamma/R)-\gamma+R]$, which is attained entrywise at $\gamma=Re^{(Z-\phi-\psi)/\lambda}$ and equals the bracket in \eqref{eq:certificate}. Weak duality in \eqref{eq:dual} holds for every $\lambda\ge0$, which gives the upper bound. The lower bound is the definition of the maximum.
+\end{proof}
+
+In practice a scaling iteration is never trusted on its own, since one stops it, reads off the potentials, and reports the gap between the certificate and the value of the best admissible plan found.
+
+\begin{definition}[Breakdown radius]
+\label{def:breakdown}
+For a payoff $Z$ and a claim of the form $\Lambda\le\alpha$, the breakdown radius is the infimum of $\sum_g\omega_g\KL(\gamma_g\|R_g)$ over the couplings with $\Lambda(\gamma)>\alpha$, with the convention that the infimum of the empty set is $+\infty$.
+\end{definition}
+
+By Proposition \ref{prop:shape}, when $H_0<\alpha<H_\infty$ the breakdown radius is the smallest $\delta$ at which $H_\delta$ reaches $\alpha$. It is zero when the claim already fails at the reference and infinite when no coupling violates it. The idea goes back to the breakdown frontiers of Masten and Poirier \cite{mastenpoirier}.
+
+\section{Additive invariance and a two-sided bound}
+\label{sec:sandwich}
+The marginal constraints make the problem ``blind'' to any part of the payoff that depends on one outcome only. This simple remark gives a two-sided bound on $H_\delta-H_0$ at every radius.
+
+For a cell $g$ we call separable the matrices of the form $S_{ij}=\phi_i+\psi_j$, and we write $\mathcal S_g$ for their linear space. The residual $Z^\perp_g$ is the component of $Z_g$ orthogonal to $\mathcal S_g$ in the inner product weighted by $R_g$, so that $Z_g=S_g+Z^\perp_g$ with $S_g\in\mathcal S_g$ and $\sum_{ij}R_{g,ij}Z^\perp_{g,ij}S'_{ij}=0$ for every separable $S'$. Orthogonality to the indicators of a row and of a column gives $\sum_jR_{g,ij}Z^\perp_{g,ij}=0$ for every $i$ and $\sum_iR_{g,ij}Z^\perp_{g,ij}=0$ for every $j$. Under a product reference the residual is the double centering of $Z_g$, under a correlated reference it is a weighted least squares residual. The two constants that appear below are the projected variance and the residual bound,
+\begin{equation}
+V_R=\sum_g\omega_g\sum_{ij}R_{g,ij}\big(Z^\perp_{g,ij}\big)^2,\qquad M_R=\max_{g,i,j}\big|Z^\perp_{g,ij}\big|.
+\label{eq:constants}
+\end{equation}
+
+\begin{lemma}[Additive invariance]
+\label{lem:additive}
+For every $\gamma_g\in\Pi(\mu_g,\nu_g)$ and every $S\in\mathcal S_g$ we have $\langle S,\gamma_g\rangle=\langle S,R_g\rangle$. Consequently $\Lambda(\gamma)-H_0=\sum_g\omega_g\langle Z^\perp_g,\gamma_g\rangle$ for every admissible $\gamma$, and $\sum_g\omega_g\langle Z^\perp_g,R_g\rangle=0$.
+\end{lemma}
+
+\begin{proof}
+For $S_{ij}=\phi_i+\psi_j$ we get $\langle S,\gamma_g\rangle=\mu_g^\top\phi+\nu_g^\top\psi$, which does not depend on the coupling and is the same for $R_g$. Writing $Z_g=S_g+Z^\perp_g$ and summing over cells gives the second claim. The third follows from orthogonality of the residual to the constant matrix, which is separable.
+\end{proof}
+
+\begin{theorem}[Finite-radius sandwich]
+\label{thm:sandwich}
+For every bounded payoff $Z$, every strictly positive reference $R$ and every $\delta\ge0$,
+\begin{equation}
+\sqrt{2\delta V_R}-\delta M_R\;\le\;H_\delta(Z;R)-H_0(Z;R)\;\le\;\sqrt{2\delta V_R}+\tfrac13\delta M_R.
+\label{eq:sandwich}
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+(Upper bound.) By Lemma \ref{lem:additive}, $H_\delta-H_0$ is the maximum of $\sum_g\omega_g\langle Z^\perp_g,\gamma_g\rangle$ over $\mathcal U_\delta(R)$. Dropping the marginal constraints enlarges the feasible set to all collections of probability matrices with weighted divergence at most $\delta$. For one probability law and a bounded function $f$ with $\E_Rf=0$, the variational principle of Donsker and Varadhan \cite{donskervaradhan} gives $\sup\{\E_\gamma f:\KL(\gamma\|R)\le\delta\}=\inf_{\lambda>0}\{\lambda\delta+\lambda\log\E_Re^{f/\lambda}\}$, which is the form used by Hu and Hong \cite{huhong}, and with weighted cells and a common budget the same duality gives
+\begin{equation}
+H_\delta-H_0\le\inf_{\lambda>0}\Big\{\lambda\delta+\sum_g\omega_g\,\lambda\log\E_{R_g}e^{Z^\perp_g/\lambda}\Big\},
+\label{eq:dvbound}
+\end{equation}
+where $\E_{R_g}$ is the expectation under the probability matrix $R_g$. Under $R_g$ the residual has mean zero, variance $v_g=\sum_{ij}R_{g,ij}(Z^\perp_{g,ij})^2$ and modulus at most $M_R$. Bernstein's inequality for the logarithmic moment generating function, in the form of Boucheron, Lugosi and Massart \cite{blm}, gives $\log\E_{R_g}e^{tZ^\perp_g}\le v_gt^2/(2(1-M_Rt/3))$ for $0<t<3/M_R$. We take $t=1/\lambda$ with $\lambda>M_R/3$ and sum with the weights, which gives
+\begin{equation}
+H_\delta-H_0\le\inf_{\lambda>M_R/3}\Big\{\lambda\delta+\frac{V_R}{2(\lambda-M_R/3)}\Big\}.
+\end{equation}
+With $s=\lambda-M_R/3>0$ the bracket is $s\delta+\delta M_R/3+V_R/(2s)$, minimized at $s=\sqrt{V_R/(2\delta)}$ with value $\sqrt{2\delta V_R}+\delta M_R/3$.
+
+(Lower bound.) We fix $t\in[0,1/M_R)$ and tilt the reference linearly, $\gamma^t_{g,ij}=R_{g,ij}(1+tZ^\perp_{g,ij})$. The plan is nonnegative because $t|Z^\perp_{g,ij}|<1$, and its row and column sums are those of $R_g$ because the residual is orthogonal to rows and columns, so $\gamma^t_g\in\Pi(\mu_g,\nu_g)$, as a one-line computation confirms. By Lemma \ref{lem:additive} its payoff is $\Lambda(\gamma^t)-H_0=\sum_g\omega_g\sum_{ij}R_{g,ij}(1+tZ^\perp_{g,ij})Z^\perp_{g,ij}=tV_R$. Its divergence is $\sum_g\omega_g\sum_{ij}R_{g,ij}\varphi(tZ^\perp_{g,ij})$ with $\varphi(x)=(1+x)\log(1+x)-x$, because the linear term vanishes. Since $\varphi(0)=\varphi'(0)=0$ and $\varphi''(x)=1/(1+x)\le1/(1-tM_R)$ on the relevant range, Taylor's theorem gives
+\begin{equation}
+\sum_g\omega_g\KL(\gamma^t_g\|R_g)\le\frac{t^2V_R}{2(1-tM_R)}.
+\end{equation}
+We choose $t$ as the positive root of $t^2V_R=2\delta(1-tM_R)$, that is $t=(\sqrt{\delta^2M_R^2+2\delta V_R}-\delta M_R)/V_R$, which satisfies $tM_R<1$ for every $\delta$. Then $\gamma^t$ is admissible and $H_\delta-H_0\ge tV_R=\sqrt{2\delta V_R+\delta^2M_R^2}-\delta M_R\ge\sqrt{2\delta V_R}-\delta M_R$.
+\end{proof}
+
+\begin{corollary}[Local law and breakdown]
+\label{cor:local}
+For a payoff with $V_R>0$, $H_\delta-H_0=\sqrt{2\delta V_R}+O(\delta)$ as $\delta\downarrow0$, with the remainder bounded by $\delta M_R$ in absolute value. For a claim $\Lambda\le\alpha$ with safety margin $m=\alpha-H_0>0$ the breakdown radius is $m^2/(2V_R)+O(m^3)$ as $m\downarrow0$.
+\end{corollary}
+
+\begin{proof}
+The first statement is Theorem \ref{thm:sandwich}. The breakdown radius is the smallest $\delta$ with $H_\delta-H_0=m$, and it lies between the roots of $\sqrt{2\delta V_R}\pm\delta M_R=m$, both of which equal $m^2/(2V_R)+O(m^3)$.
+\end{proof}
+
+\comments The bound says that, at small radii, the worst case moves like the square root of the radius, with a constant that is a variance. The variance is the one of the payoff after the separable part has been removed, which is what the marginals cannot see, and this is the local law with explicit remainders.
+
+\begin{remark}[Where the slack is]
+The dual \eqref{eq:dual} and the certificate \eqref{eq:certificate} show that the upper bound \eqref{eq:dvbound} becomes an equality if the separable part subtracted from $Z_g$ is the pair of optimal dual potentials in place of the $R_g$-orthogonal projection, since the bridge is an exponential tilt of the reference by $Z_g$ minus a separable function. The projection minimizes the variance in the leading term, so the only loss in the upper bound comes from the Bernstein step. The lower bound pays the full $\delta M_R$ because the linear tilt is cruder than the exponential tilt of the bridge.
+\end{remark}
+
+\begin{remark}[Informativeness]
+The lower bound is positive only for $\delta<2V_R/M_R^2$, a threshold that depends on the reference through the residual. Under a nearly diagonal reference, such as the mixture with small $\kappa$, the residual is large where $R_g$ is small, off the diagonal, so $M_R$ is large and the informative range is short, whereas under the product reference the range is much longer.
+\end{remark}
+
+\section{Extremal couplings without restriction}
+\label{sec:extremal}
+Before entering the ball it is useful to know where the worst cases sit when nothing restricts the coupling. We do this for translated uniforms of equal width, the case of the benchmark. In this section $Y^0\sim U(a,a+L)$ and $Y^1\sim U(a+\Delta,a+\Delta+L)$ with $L>0$ and $\Delta\ge0$, and for a constant transfer $b\ge0$ we write $\sigma=(\Delta+b)/L$ for the threshold in units of the width.
+
+\begin{lemma}[Makarov bound for translated uniforms]
+\label{lem:makarov}
+$\sup_{\gamma\in\Pi}\Pr_\gamma(Y^0>Y^1+b)=\min\{1,(1-\sigma)_+\}$.
+\end{lemma}
+
+\begin{proof}
+A loss requires $Y^0>a+\Delta+b$, which has probability $(1-\sigma)_+$, so the value is an upper bound. A rotation of ranks by slightly more than $\sigma$ pairs every control outcome above $a+\Delta+b$ with a treated outcome below it minus $b$, so the bound is approached. For $\sigma\ge1$ no loss is possible.
+\end{proof}
+
+The bound of Makarov \cite{makarov} is only approached, since the rotation must make every unit of mass lose by an arbitrarily small amount. This is already a hint that the coupling that maximizes the number of losers is very different from the one that maximizes the size of losses.
+
+\begin{proposition}[Two adversaries]
+\label{prop:adversaries}
+The couplings that attain $H_\delta$ for the loss indicator and for the shortfall with the same transfer are different in general. Without restrictions and for $\sigma\le1$, the maximal expected shortfall is attained by the countermonotone coupling and equals
+\begin{equation}
+\sup_{\gamma\in\Pi}\E_\gamma\big[(Y^0-Y^1-b)_+\big]=\frac L4(1-\sigma)^2,
+\label{eq:shortfall}
+\end{equation}
+while the supremum of the loss share is $1-\sigma$, approached by rank rotations.
+\end{proposition}
+
+\begin{proof}
+The shortfall is $h(Y^0-Y^1)$ with $h(x)=(x-b)_+$ convex, and for a convex function of a difference the expectation at fixed marginals is maximized by the countermonotone coupling, by the inequality of Cambanis, Simons and Stout \cite{cambanis} applied to the submodular kernel $(x,y)\mapsto h(x-y)$. Under that coupling $Y^0=a+LU$ and $Y^1=a+\Delta+L(1-U)$ with $U$ uniform, so $Y^0-Y^1-b=L(2U-1-\sigma)$, positive for $U>(1+\sigma)/2$, and $L\int_{(1+\sigma)/2}^1(2u-1-\sigma)\,du=L(1-\sigma)^2/4$. The second statement is Lemma \ref{lem:makarov}. The first adversary concentrates the losses on the largest gaps, the second spreads them over as many pairs as possible.
+\end{proof}
+
+\begin{remark}[Weighted gains]
+For a weight $w$ that is nonincreasing in the counterfactual, the kernel $(x,y)\mapsto w(x)y$ is submodular, so $\E[w(Y^0)Y^1]$ is maximized by the countermonotone coupling and minimized by the comonotone one. The welfare-weighted gain is therefore bracketed by the two extreme couplings, and its identified interval at radius $\delta$ moves between the value at the reference and these two extremes.
+\end{remark}
+
+\section{The threshold payoff under the product reference}
+\label{sec:exact}
+For the loss indicator and the product reference the worst case at every radius can be written down. The reason is that the bridge kernel is constant on each side of a straight line, so the Schrödinger equations for the potentials reduce to two first-order equations with a conserved quantity. We normalize the supports of one cell to the unit interval, so that $X\sim U(0,1)$ and $Y\sim U(0,1)$ in their own coordinates, a loss is the event $X>Y+\sigma$ with $\sigma\in(0,1)$, and the payoff is $Z(x,y)=\mathbf 1\{x>y+\sigma\}$. At the reference the loss share is $H_0=(1-\sigma)^2/2$, and without restrictions it is $1-\sigma$. For a multiplier $\lambda>0$ we write $\theta=1/\lambda$ and $c=e^\theta-1$, so that the bridge has density $u(x)v(y)e^{\theta Z(x,y)}$ with respect to the product reference. We write $F_u(t)=\int_0^tu$ and $F_v(t)=\int_0^tv$ for the cumulated potentials and $\bar u=F_u(1)$, $\bar v=F_v(1)$ for their totals.
+
+\begin{theorem}[Bridge under a threshold payoff]
+\label{thm:bridge}
+For every $\theta>0$ the equation
+\begin{equation}
+\sigma\,\xi\log\xi+(1-\sigma)\,\xi=(1-\sigma)\,e^\theta
+\label{eq:xi}
+\end{equation}
+has a unique root $\xi\in(1,e^\theta)$, given by $\xi=\exp\big(W_0\big(\tfrac{1-\sigma}{\sigma}e^{\theta+(1-\sigma)/\sigma}\big)-\tfrac{1-\sigma}{\sigma}\big)$ with $W_0$ the principal branch of the Lambert function. Let $\Omega=\sigma c/(e^\theta-\xi)$ and $P_0=\Omega\xi$. Up to the scale $u\mapsto\rho u$, $v\mapsto v/\rho$, the potentials of the bridge are
+\begin{equation}
+u(x)=\begin{cases}1/\bar v & x\le\sigma\\ e^{-c(x-\sigma)/P_0}/\bar v & x>\sigma\end{cases},\qquad
+v(y)=\begin{cases}\bar v\,e^{cy/P_0}/P_0 & y\le1-\sigma\\ 1/\bar u & y>1-\sigma\end{cases},
+\label{eq:potentials}
+\end{equation}
+with $\bar u\bar v=\Omega$. The loss share and the divergence along the penalized path are
+\begin{equation}
+H(\theta)=\frac{e^\theta}{c}\Big[(1-\sigma)-\frac{\sigma(\xi-1)}{e^\theta-\xi}\Big],\qquad
+\KL(\theta)=-\log\Omega-(1-\sigma)\log\xi+\theta H(\theta),
+\label{eq:HKL}
+\end{equation}
+both strictly increasing in $\theta$, with $H(\theta)\uparrow1-\sigma$ and $\KL(\theta)\uparrow\infty$. The worst case at radius $\delta$ is $H(\theta_\delta)$ with $\KL(\theta_\delta)=\delta$, and the breakdown radius of the claim that the loss share is at most $\alpha\in(H_0,1-\sigma)$ is $\KL(\theta_\alpha)$ with $H(\theta_\alpha)=\alpha$.
+\end{theorem}
+
+\begin{proof}
+(Potentials.) The marginal constraint in $x$ reads $u(x)\int_0^1v(y)e^{\theta\mathbf 1\{y<x-\sigma\}}dy=1$, that is $u(x)[\bar v+cF_v(x-\sigma)]=1$ with $F_v=0$ on negative arguments. The constraint in $y$ reads $v(y)[\bar u+c(\bar u-F_u(y+\sigma))]=1$ with $F_u=\bar u$ beyond one. For $x\le\sigma$ and for $y\ge1-\sigma$ the brackets are constant, which gives the outer branches of \eqref{eq:potentials}. On the interaction range we set $f(t)=F_v(t)$ and $g(t)=\bar u-F_u(t+\sigma)$ for $t\in[0,1-\sigma]$, so that $f(0)=0$, $g(1-\sigma)=0$, and the two constraints become
+\begin{equation}
+f'(t)=\frac1{\bar u+c\,g(t)},\qquad g'(t)=-\frac1{\bar v+c\,f(t)}.
+\end{equation}
+The product $(\bar v+cf)(\bar u+cg)$ has derivative $c(\bar u+cg)f'+c(\bar v+cf)g'=c-c=0$. This is the key point. The product is a constant $P_0$ along the path, and each equation becomes linear, $f'=(\bar v+cf)/P_0$ and $g'=-(\bar u+cg)/P_0$, with solutions $\bar v+cf(t)=\bar ve^{ct/P_0}$ and $\bar u+cg(t)=\bar ue^{c(1-\sigma-t)/P_0}$, which give \eqref{eq:potentials}. Evaluating the product at $t=0$ gives $P_0=\bar u\bar v\xi$ with $\xi=e^{c(1-\sigma)/P_0}$. The outer branches close the system through $\bar v=f(1-\sigma)+\sigma/\bar u$ and $\bar u=\sigma/\bar v+g(0)$, and both reduce to $\Omega(1-(\xi-1)/c)=\sigma$, so that $\Omega=\sigma c/(e^\theta-\xi)$ and $P_0=\Omega\xi$. Substituting $P_0$ in $\xi=e^{c(1-\sigma)/P_0}$ gives $\sigma\xi\log\xi=(1-\sigma)(e^\theta-\xi)$, which is \eqref{eq:xi}. Its left side is increasing in $\xi$ on $[1,\infty)$, equals $1-\sigma$ at $\xi=1$ and exceeds $(1-\sigma)e^\theta$ at $\xi=e^\theta$, so the root is unique in $(1,e^\theta)$, and $\xi=e^w$ turns the equation into $(\sigma w+1-\sigma)e^w=(1-\sigma)e^\theta$, whose solution is the Lambert form.
+
+(Loss share and divergence.) The mass of losses in the row $x=t+\sigma$ is $u(x)e^\theta F_v(x-\sigma)=e^\theta f(t)/(\bar v+cf(t))=(e^\theta/c)(1-e^{-ct/P_0})$, and integrating over $t\in[0,1-\sigma]$ gives $H=(e^\theta/c)[(1-\sigma)-(P_0/c)(1-1/\xi)]$, which is \eqref{eq:HKL} after substituting $P_0$. For the divergence, $\KL=\int\gamma[\log u+\log v+\theta Z]=\int_0^1\log u+\int_0^1\log v+\theta H$ because the bridge has uniform marginals, and the two integrals computed from \eqref{eq:potentials} sum to $-\sigma\log\Omega-(1-\sigma)\log P_0=-\log\Omega-(1-\sigma)\log\xi$. Monotonicity, the limits and the characterization of the constrained worst case are the properties of the dual recalled in Proposition \ref{prop:dual}.
+\end{proof}
+
+\begin{corollary}[Aggregation and the local constant]
+\label{cor:bridge}
+With cells of thresholds $\sigma_g$ and a common multiplier, the aggregate worst case at radius $\delta$ is $\sum_g\omega_gH_g(\theta)$ at the $\theta$ that solves $\sum_g\omega_g\KL_g(\theta)=\delta$, with $H_g$ and $\KL_g$ given by \eqref{eq:HKL} at $\sigma_g$. The projected variance of the loss indicator under the product reference is
+\begin{equation}
+V(\sigma)=\frac{(1-\sigma)^2}2-\frac{2(1-\sigma)^3}3+\frac{(1-\sigma)^4}4,
+\end{equation}
+and $H(\theta)-H_0=\sqrt{2\KL(\theta)V(\sigma)}\,(1+O(\theta))$, so the exact solution reproduces the leading constant of Theorem \ref{thm:sandwich}.
+\end{corollary}
+
+\begin{proof}
+The aggregate statement follows from Lemma \ref{lem:additive} and the common multiplier of the dual. For the variance, the residual of a binary payoff under a product reference is the double centering, so $V=\E Z-\E[\E(Z\mid X)^2]-\E[\E(Z\mid Y)^2]+(\E Z)^2$, with $\E(Z\mid X=x)=(x-\sigma)_+$ and $\E(Z\mid Y=y)=(1-\sigma-y)_+$, whose squares integrate to $(1-\sigma)^3/3$ each. The expansion is a direct computation on \eqref{eq:xi} and \eqref{eq:HKL}.
+\end{proof}
+
+\comments As far as I can tell the closed form is new, since closed forms in entropic transport are rare, and the analogy is with the Gaussian case, where the scaling equations close because the kernel is quadratic. Here they close because the kernel is piecewise constant and the conserved product removes the coupling between the two equations.
+
+\section{The mixture reference}
+\label{sec:mixture}
+Under the mixture $R^{(\kappa)}=(1-\kappa)R^{\mathrm{rank}}+\kappa R^{\mathrm{ind}}$ the bridge has a part concentrated on the diagonal, where the loss indicator vanishes because $\sigma>0$, and a part with a density with respect to the product. If we try to repeat the argument of Theorem \ref{thm:bridge}, the two marginal constraints become $u(x)[(1-\kappa)v(x)+\kappa k_0(x)]=1$ and $v(x)[(1-\kappa)u(x)+\kappa k_1(x)]=1$, where $k_0(x)=\bar v+cF_v(x-\sigma)$ and $k_1(x)=\bar u+c(\bar u-F_u(x+\sigma))$ are the two brackets of the product case. The diagonal term couples the potentials at the same point and the threshold couples them at points $\sigma$ apart, so the conserved product is lost and we are left with a system of equations with a delay. The way out is to look at the diagonal mass and the rest separately. The rest is a bridge with a product reference between two identical marginals, and for such a bridge the conservation law survives in the form of a quadrature.
+
+\begin{lemma}[Conservation for identical marginals]
+\label{lem:identical}
+Let $\eta$ be a positive density on $[0,1]$, with cumulated mass $N(t)=\int_0^t\eta$, and consider the bridge between the marginals $\eta$ and $\eta$ with the Lebesgue product as reference and the payoff $\mathbf 1\{x>y+\sigma\}$, with potentials $a$ and $b$, totals $\bar a=\int_0^1a$ and $\bar b=\int_0^1b$, and $\Omega=\bar a\bar b$. For $t\in[0,1-\sigma]$ let
+\begin{equation}
+P(t)=P_0+c\big[N(t)-N(t+\sigma)+N(\sigma)\big],
+\end{equation}
+and define the two log-exponents $\ell_0(t)=c\int_0^t\eta(s)/P(s)\,ds$ and $\ell_1(t)=c\int_t^{1-\sigma}\eta(s+\sigma)/P(s)\,ds$. Then
+\begin{equation}
+a(x)=\frac{\eta(x)}{\bar b\,\exp\{\ell_0(x-\sigma)\mathbf 1\{x>\sigma\}\}},\qquad
+b(y)=\frac{\eta(y)}{\bar a\,\exp\{\ell_1(y)\mathbf 1\{y\le1-\sigma\}\}},
+\label{eq:identical}
+\end{equation}
+where $P_0$ solves the scalar closure $P_0[(c+1)e^{-\ell_1(0)}-1]=c\,N(\sigma)$ and $\Omega=P_0e^{-\ell_1(0)}$.
+\end{lemma}
+
+\begin{proof}
+The proof of Theorem \ref{thm:bridge} goes through with $\eta$ in place of the unit density. With $f(t)=F_b(t)$ and $g(t)=\bar a-F_a(t+\sigma)$, the two constraints give $f'=\eta(t)/(\bar a+cg)$ and $g'=-\eta(t+\sigma)/(\bar b+cf)$. The product $(\bar b+cf)(\bar a+cg)$ now has derivative $c[\eta(t)-\eta(t+\sigma)]$, which is a known function, and integrates to $P$. Each equation is linear with the known coefficient $\eta/P$, so $\bar b+cf=\bar be^{\ell_0}$ and $\bar a+cg=\bar ae^{\ell_1}$, which give \eqref{eq:identical}. The mass of the treated outcomes below $\sigma$, where the bracket is constant, gives $\bar a=N(\sigma)/\bar b+g(0)$, and with $P_0=P(0)=\Omega e^{\ell_1(0)}$ this is the stated closure. The closure is continuous in $P_0$, tends to $-cN(\sigma)$ as $P_0$ decreases to the smallest value that keeps $P$ positive and grows without bound with $P_0$, and its root is unique because the bridge is.
+\end{proof}
+
+\begin{proposition}[Reduction to a scalar fixed point]
+\label{prop:reduction}
+Let $\eta$ solve, for every $x\in[0,1]$,
+\begin{equation}
+\eta(x)=\frac2{1+\sqrt{1+4q_\eta(x)}},\qquad q_\eta(x)=\frac{1-\kappa}{\kappa\,\Omega_\eta}\exp\big\{-\ell_0(x-\sigma)\mathbf 1\{x>\sigma\}-\ell_1(x)\mathbf 1\{x\le1-\sigma\}\big\},
+\label{eq:fixedpoint}
+\end{equation}
+with $\Omega_\eta$, $\ell_0$ and $\ell_1$ computed from $\eta$ as in Lemma \ref{lem:identical}. Then the bridge of the mixture reference at multiplier $\theta$ keeps the mass $1-\eta(x)$ on the diagonal at $x$ and coincides off the diagonal with the bridge of Lemma \ref{lem:identical}. Conversely, the bridge determines such an $\eta$. The loss share and the divergence are
+\begin{equation}
+\begin{aligned}
+H(\theta)&=\frac{e^\theta}c\int_0^{1-\sigma}\eta(t+\sigma)\big(1-e^{-\ell_0(t)}\big)\,dt,\\
+\KL(\theta)&=\int_0^1\big[2\log\eta-\ell_0(x-\sigma)\mathbf 1\{x>\sigma\}-\ell_1(x)\mathbf 1\{x\le1-\sigma\}\big]dx-\log\Omega_\eta-\log\kappa+\theta H(\theta).
+\end{aligned}
+\label{eq:persistentHKL}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+The bridge has the form $u(x)v(y)e^{\theta Z(x,y)}$ with respect to $R^{(\kappa)}$. Its diagonal part has density $p(x)=(1-\kappa)u(x)v(x)$, since the payoff vanishes on the diagonal, and its other part has density $\kappa u(x)v(y)e^{\theta Z(x,y)}$ with respect to the Lebesgue product. Both marginals of the bridge are uniform, so both marginals of the second part equal $\eta=1-p$. The second part is therefore the bridge of Lemma \ref{lem:identical}, with $a=u/\rho$ and $b=\rho\kappa v$ for a free scale $\rho$. The product $ab=\kappa uv$ does not depend on the scale and equals $\eta^2/(\Omega_\eta e^{\ell_0+\ell_1})$ by \eqref{eq:identical}, so $p=1-\eta$ reads $\eta=1-\frac{1-\kappa}\kappa\,\eta^2/(\Omega_\eta e^{\ell_0+\ell_1})$, a quadratic in $\eta(x)$ whose positive root is \eqref{eq:fixedpoint}. Conversely, a solution of \eqref{eq:fixedpoint} defines $u$ and $v$ through the same relations, the resulting plan has uniform marginals and the form of the bridge, and it is the bridge by uniqueness. The loss share is computed as in Theorem \ref{thm:bridge}. For the divergence, the logarithm of the density of the bridge with respect to the reference is $\log u+\log v+\theta Z$ on both parts, and with uniform marginals its integral is $\int\log u+\int\log v+\theta H=\int\log(ab)-\log\kappa+\theta H$, which gives \eqref{eq:persistentHKL}.
+\end{proof}
+
+\comments Given $\eta$, the delayed terms appear only through $N(t+\sigma)$ and $\eta(t+\sigma)$, which are integrals and values of a known function. Every evaluation of the map in \eqref{eq:fixedpoint} is then a quadrature plus a scalar root, and the problem is a fixed point in one function of one variable. The method of steps for delay equations, which Bellen and Zennaro \cite{bellenzennaro} treat in general, would solve the same system by shooting on two constants across segments of length $\sigma$, and the fixed point makes it unnecessary. The reduction holds for any reference that mixes a singular component with the product, as long as the payoff vanishes on the support of the singular component.
+
+\begin{proposition}[Closed-form brackets]
+\label{prop:brackets}
+Let $H^{\mathrm{ind}}_\delta$ be the worst case under the product reference, given by Theorem \ref{thm:bridge} and Corollary \ref{cor:bridge}. For every $\delta\ge0$ the worst case under the mixture reference satisfies
+\begin{equation}
+\kappa\,H^{\mathrm{ind}}_{\delta/\kappa}\;\le\;H^{(\kappa)}_\delta\;\le\;\inf_{\theta>0}\frac1\theta\Big\{\delta+\sum_g\omega_g\log\Big(1+\kappa\,(e^\theta-1)\frac{(1-\sigma_g)^2}2\Big)\Big\}.
+\label{eq:brackets}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+(Lower bracket.) We keep in every cell the diagonal component of the reference and replace its product component by the worst case under the product reference at global radius $\delta/\kappa$, whose marginals are uniform and whose two components are mutually singular, so the divergence of the plan from $R^{(\kappa)}_g$ is $\kappa$ times the divergence of the second component from the product, and the weighted divergence is $\kappa\cdot\delta/\kappa=\delta$. The payoff vanishes on the diagonal, so the plan attains $\kappa H^{\mathrm{ind}}_{\delta/\kappa}$. (Upper bracket.) We drop the marginal constraints and apply the variational principle of Donsker and Varadhan cell by cell, which bounds the payoff of any collection with weighted divergence at most $\delta$ by $\{\delta+\sum_g\omega_g\log\E_{R_g}e^{\theta Z_g}\}/\theta$ for every $\theta>0$. Under the mixture the payoff vanishes on the diagonal and has mean $(1-\sigma_g)^2/2$ under the product, which gives the moment generating function in \eqref{eq:brackets}.
+\end{proof}
+
+The gap between the lower bracket and the worst case has an interpretation, since the lower bracket leaves the persistent people where they are and lets the adversary reshuffle only the share $\kappa$ that the reference already reshuffles. The gap is what the adversary gains by breaking persistence, and the fixed point records it directly as the fall of the diagonal mass $1-\int\eta$ below $1-\kappa$.
+
+\begin{remark}[What is left open]
+In the computations of Part II the map \eqref{eq:fixedpoint} is iterated with damping in logarithms and converges for every multiplier used, but I do not have a proof that it is a contraction. A natural route is a monotonicity argument, since $q_\eta$ moves in the opposite direction of $\eta$ through $\Omega_\eta$ and the two log-exponents.
+\end{remark}
+
+\section{Instruments that depend on the realized outcome}
+\label{sec:design}
+Once the transfer, constant so far, may depend on the realized outcome, the identification problem becomes partly a property of the instrument, and some guarantees hold under every coupling at a cost that the treated marginal alone identifies. In this section a cell has $Y^0\sim U(a_g,a_g+L_g)$ and $Y^1\sim U(l_g,l_g+L_g)$ with $l_g=a_g+\Delta_g$, as in Section \ref{sec:extremal}.
+
+\begin{definition}[Instrument classes]
+A transfer rule is a function $T_g:[l_g,l_g+L_g]\to[0,\infty)$ of the realized outcome. For a ceiling $\bar\tau\in[0,1]$ on the withdrawal rate, the class $\mathcal T(\bar\tau)$ collects the nonincreasing rules with $0\le T_g(y)-T_g(y')\le\bar\tau(y'-y)$ for $y<y'$.
+\end{definition}
+
+Under such a rule each additional unit of outcome reduces the transfer by at most $\bar\tau$, so compensated outcomes $y+T_g(y)$ are nondecreasing, and $\bar\tau$ is the implicit marginal tax rate faced below the exhaustion point. The class $\mathcal T(0)$ contains the constant transfers and $\mathcal T(1)$ contains the floors $(q-y)_+$. The expected outlay $\sum_g\omega_g\E[T_g(Y^1)]$ depends on the treated marginal only. The guarantee we look at is a cap $\alpha$ on the probability of a strict loss, $\Pr(Y^1+T_g(Y^1)<Y^0\mid G=g)\le\alpha$, in every cell and under every admissible coupling.
+
+\begin{proposition}[Dependence-free cap]
+\label{prop:floor}
+Let $q_g$ be the $(1-\alpha)$-quantile of the control marginal and $T_g(y)=(q_g-y)_+$. Then, for every coupling, the probability of a strict loss is at most $\Pr(Y^0>q_g)\le\alpha$, the expected outlay $\E[(q_g-Y^1)_+]$ is identified by the treated marginal, and the residual loss satisfies $(Y^0-Y^1-T_g(Y^1))_+\le(Y^0-q_g)_+$ pointwise, so its expectation is at most $\E[(Y^0-q_g)_+]$ under every coupling. With $\Delta_g\le(1-\alpha)L_g$ the outlay is $[(1-\alpha)L_g-\Delta_g]^2/(2L_g)$ and the bound on the residual loss is $\alpha^2L_g/2$.
+\end{proposition}
+
+\begin{proof}
+Compensated outcomes equal $\max\{Y^1,q_g\}\ge q_g$, so a strict loss requires $Y^0>q_g$, whose probability is at most $\alpha$ whatever the coupling. The outlay is a function of $Y^1$ only and the residual loss is at most $(Y^0-\max\{Y^1,q_g\})_+\le(Y^0-q_g)_+$, a function of $Y^0$ only. With $q_g=a_g+(1-\alpha)L_g$ the outlay is $\int_{l_g}^{q_g}(q_g-y)\,dy/L_g=(q_g-l_g)^2/(2L_g)$ and $\E[(Y^0-q_g)_+]=(\alpha L_g)^2/(2L_g)$.
+\end{proof}
+
+The floor turns an assumption on the coupling into a feature of the rule. The next result says that, without restrictions on the coupling, there is a cheapest rule in every class, and it is a truncated line.
+
+\begin{theorem}[Pointwise minimal rule]
+\label{thm:minimal}
+Let $q_g=a_g+(1-\alpha)L_g$ and let $b^\star_g=((1-\alpha)L_g-\Delta_g)_+$ be the smallest constant transfer that meets the cap. For every $\bar\tau\in[0,1]$, among the rules in $\mathcal T(\bar\tau)$ that keep the probability of a strict loss at most $\alpha$ under every coupling, the rule
+\begin{equation}
+T^\star_g(y)=\big(b^\star_g-\bar\tau(y-l_g)\big)_+
+\label{eq:minimal}
+\end{equation}
+is pointwise minimal. It therefore minimizes the expected outlay and every cost that is nondecreasing in the transfer, and it is the unique minimizer of the expected outlay up to null sets.
+\end{theorem}
+
+\begin{proof}
+Let $T_g$ be feasible and $t_0=T_g(l_g)$. Since $T_g$ is nonincreasing, compensated outcomes under $T_g$ are at most $y+t_0$, so every loss under the constant transfer $t_0$ is a loss under $T_g$, for every coupling. Feasibility of $T_g$ therefore requires feasibility of the constant $t_0$, which by Lemma \ref{lem:makarov} means $t_0\ge b^\star_g$. The bound on the decrements and nonnegativity then give $T_g(y)\ge\max\{0,t_0-\bar\tau(y-l_g)\}\ge T^\star_g(y)$. It remains to check that $T^\star_g$ is feasible. Under $T^\star_g$ compensated outcomes are nondecreasing with minimum $l_g+b^\star_g\ge q_g$, so a strict loss requires $Y^0>q_g$, an event of probability $\alpha$ whatever the coupling. When $b^\star_g=0$ the rule is zero and the same argument applies with $l_g\ge q_g$. The rule belongs to the class since its decrements are exactly $\bar\tau$ where it is positive. Uniqueness in outlay follows from the positive density of the treated marginal.
+\end{proof}
+
+\comments The proof works by pointwise domination, so no parametric family is involved. It uses two features of the benchmark, the translation of uniforms of equal width and the monotonicity of the rule, and it concerns the unrestricted boundary only. At a finite radius the property fails, as Section \ref{sec:instruments} shows on an example.
+
+\begin{corollary}[Fiscal frontier]
+\label{cor:frontier}
+The expected outlay of \eqref{eq:minimal} in cell $g$ is $b^\star_g$ when $\bar\tau=0$, $b^\star_g-\bar\tau L_g/2$ when $\bar\tau>0$ and $b^\star_g\ge\bar\tau L_g$, and $(b^\star_g)^2/(2\bar\tau L_g)$ when $\bar\tau>0$ and $b^\star_g<\bar\tau L_g$. The aggregate outlay is the weighted mean of these values, linear in $\bar\tau$ as long as no cell exhausts its transfer before the top of the support.
+\end{corollary}
+
+\begin{proof}
+Integrate the truncated line against the uniform treated marginal, distinguishing whether the transfer reaches zero before the top of the support.
+\end{proof}
+
+\begin{proposition}[Sharp severity]
+\label{prop:severity}
+The maximal expected residual loss of the rule \eqref{eq:minimal} is
+\begin{equation}
+\sup_{\gamma\in\Pi}\E_\gamma\big[(Y^0-Y^1-T^\star_g(Y^1))_+\big]=\frac{\alpha^2L_g}{2(2-\bar\tau)}
+\label{eq:severity}
+\end{equation}
+whenever $b^\star_g\ge\bar\tau\alpha L_g/(2-\bar\tau)$, and the supremum is attained by the countermonotone coupling.
+\end{proposition}
+
+\begin{proof}
+The residual loss is $(Y^0-W)_+$ with $W=Y^1+T^\star_g(Y^1)$ nondecreasing in $Y^1$, so the law of $W$ is fixed by the treated marginal and the kernel $(x,w)\mapsto(x-w)_+$ is submodular. The expectation is then maximized at the countermonotone coupling of $Y^0$ and $W$, by Cambanis, Simons and Stout \cite{cambanis}. Write $Y^1=l_g+L_gs$ and $Y^0=a_g+L_g(1-s)$ with $s$ uniform. Where the transfer is positive $W=q_g+(1-\bar\tau)L_gs$, and the residual loss is $(\alpha L_g-(2-\bar\tau)L_gs)_+$, which vanishes for $s\ge\alpha/(2-\bar\tau)$. The condition in the statement keeps the transfer positive on that range, and integrating gives $L_g\alpha^2/(2-\bar\tau)-L_g(2-\bar\tau)\alpha^2/(2(2-\bar\tau)^2)=\alpha^2L_g/(2(2-\bar\tau))$.
+\end{proof}
+
+Raising the ceiling lowers the outlay mostly at the top of the treated distribution and raises the worst expected residual loss from $\alpha^2L_g/4$ at a constant transfer to $\alpha^2L_g/2$ at the floor, while the cap on the loss share stays at $\alpha$. The insurance content of the rule falls with its cost, so no welfare ranking follows from the saving alone.
+
+\begin{proposition}[Grid version]
+\label{prop:grid}
+On a grid of $J$ midpoints per cell with masses $1/J$, let $k_J=\lfloor\alpha J\rfloor$, let $q_{gJ}$ be the control point with index $J-k_J$ and $l_{gJ}$ the smallest treated point. Among nonnegative sequences with decrements between zero and $\bar\tau$ times the spacing, the rule $T^{\star,J}_{gj}=(q_{gJ}-l_{gJ}-\bar\tau(y^1_{gj}-l_{gJ}))_+$ is pointwise minimal among those whose worst-case loss share is at most $k_J/J$ under every coupling, and its worst-case share equals $k_J/J$.
+\end{proposition}
+
+\begin{proof}
+A constant transfer below $q_{gJ}-l_{gJ}$ admits an assignment with at least $k_J+1$ losers, by pairing each control point above the shifted minimum with a distinct treated point below it. The first element of a feasible sequence must therefore reach that intercept, and the bound on decrements forces the rule pointwise. The rule keeps every compensated point at least at $q_{gJ}$ and leaves exactly $k_J$ control points above it.
+\end{proof}
+
+Inside a ball the design problem gets a second argument. For a reference $R$, a global radius $\delta$ and a ceiling $\bar\tau$, the fiscal surface is
+\begin{equation}
+B^\star(\alpha;\bar\tau,\delta;R)=\min\Big\{\sum_g\omega_g\E[T_g(Y^1)]\,:\,T\in\mathcal T(\bar\tau),\ \sup_{\gamma\in\mathcal U_\delta(R)}\Pr_{\gamma_g}\big(Y^1+T_g(Y^1)<Y^0\big)\le\alpha\ \ \forall g\Big\}.
+\label{eq:surface}
+\end{equation}
+
+\begin{lemma}[Per-cell guarantee under a global budget]
+\label{lem:percell}
+For every cell $g$ and payoff $Z_g$,
+\begin{equation}
+\sup_{\gamma\in\mathcal U_\delta(R)}\langle Z_g,\gamma_g\rangle=\max\big\{\langle Z_g,\gamma_g\rangle\,:\,\gamma_g\in\Pi(\mu_g,\nu_g),\ \KL(\gamma_g\|R_g)\le\delta/\omega_g\big\},
+\end{equation}
+and the cell maxima are not attained simultaneously in general, so their weighted sum can exceed the aggregate worst case.
+\end{lemma}
+
+\begin{proof}
+The budget can be spent entirely in cell $g$ by keeping every other cell at its reference, which costs nothing, and no admissible collection spends more than $\delta/\omega_g$ in cell $g$. Spending the whole budget in one cell precludes spending it in another.
+\end{proof}
+
+The surface is nonincreasing in $\bar\tau$, since the classes are nested, and nondecreasing in $\delta$, since the admissible sets are. At $\bar\tau=1$ it is bounded by the outlay of the floor at every radius, because the floor is feasible under every coupling, while at small radii cheaper rules exist because the ball excludes the adverse couplings. Computing \eqref{eq:surface} is a bilevel problem whose inner level is the oracle of Section \ref{sec:duality} at a fixed rule, with the loss matrix $Z_{g,ij}=\mathbf 1\{y^0_{gi}>y^1_{gj}+t_j\}$. The outer level is a mixed-integer master in the transfers $t_j$ and in binary variables $z_{ij}$ that may declare a pair harmed, with $t_j\ge y^0_{gi}-y^1_{gj}$ whenever $z_{ij}=0$, the monotonicity and decrement constraints, and one risk constraint $\sum_{ij}\gamma_{ij}z_{ij}\le\alpha$ for every adverse plan found so far. Declaring harm in excess only tightens the risk constraints, so the master is a relaxation and its value is a global lower bound on the outlay, while the oracle either separates a violated plan or certifies the proposed rule with a dual upper bound on the risk. The relaxation is strengthened by the convex hull of the protected levels in each column, which with ordered positive gaps $d_1<\dots<d_m$ reads $t_j+\sum_r(d_r-d_{r-1})z_{rj}\ge d_m$, and the family \eqref{eq:minimal} serves only to produce initial feasible rules.
+
+\begin{lemma}[From the grid to the continuum]
+\label{lem:lifting}
+A rule that is safe on a grid with $J$ midpoints per cell lifts to a continuous rule that is safe in the continuous benchmark with an additional weighted outlay of at most $\sum_g\omega_gL_g/J$.
+\end{lemma}
+
+\begin{proof}
+Interpolating the grid rule linearly between midpoints and extending it as a constant at both ends keeps the expected outlay and the ceiling. Rounding each outcome to its midpoint moves the control and the compensated outcome by at most $L_g/(2J)$ each, and the divergence does not increase under coarsening, so adding $L_g/J$ to the transfer in cell $g$ restores the guarantee.
+\end{proof}
+
+The padding is the price of carrying a guarantee from the grid to the continuum, and the discretization error itself is usually much smaller.
+
+\begin{corollary}[Equal outlay]
+\label{cor:equal}
+For a constant transfer $b$ paid to everybody, the floor to the $p$-quantile of the control marginal with the same expected outlay, where $p$ solves $\sum_g\omega_g[(pL_g-\Delta_g)_+]^2/(2L_g)=b$, caps the loss share at $1-p$ in every cell under every coupling, while the constant transfer admits a loss share of $1-(\Delta_g+b)/L_g$, and the worst expected residual loss of the floor is $\sum_g\omega_g(1-p)^2L_g/2$.
+\end{corollary}
+
+\begin{proof}
+Apply Proposition \ref{prop:floor} with $\alpha=1-p$ and Lemma \ref{lem:makarov}, and use the closed form of the outlay.
+\end{proof}
+
+\section{Estimating a reference}
+\label{sec:estimation}
+When auxiliary data are available, a reference can be estimated. Two facts are useful here, the size of the error and the meaning of the radius once the error is small.
+
+\begin{lemma}[Rank correlation of the mixture]
+\label{lem:spearman}
+For continuous marginals the Spearman rank correlation of the mixture $R^{(\kappa)}$ is $1-\kappa$.
+\end{lemma}
+
+\begin{proof}
+The Spearman correlation is $12$ times the covariance of the two ranks, and it is linear in the copula. The comonotone copula has correlation one and the product has correlation zero.
+\end{proof}
+
+\begin{proposition}[Estimation divergence]
+\label{prop:estimation}
+Let $\hat R_g$ be the empirical copula on a $J\times J$ grid from $n_g$ independent pairs drawn from a strictly positive $R_g$. Then $\E\,\KL(R_g\|\hat R_g)=(J^2-1)/(2n_g)+o(1/n_g)$, and the same holds for $\KL(\hat R_g\|R_g)$. For the mixture family, with $\hat\kappa=1-\hat\rho_S$ and $\hat\rho_S$ the sample rank correlation, $\KL(R^{(\kappa)}_g\|R^{(\hat\kappa)}_g)=O_p(1/n_g)$ with a constant that does not grow with the grid.
+\end{proposition}
+
+\begin{proof}
+The first statement is the classical expansion of the divergence of a multinomial maximum likelihood estimate, half a chi-square statistic with $J^2-1$ degrees of freedom divided by $n_g$ to first order, and a small mixing weight on the product, which keeps entries positive, adds a term of the order of the weight. The second follows from the smoothness of $\kappa\mapsto R^{(\kappa)}_g$, the second-order expansion of the divergence in a smooth family, and the root-$n$ consistency of $\hat\rho_S$ together with Lemma \ref{lem:spearman}.
+\end{proof}
+
+\begin{remark}[Detectability]
+By the lemma of Stein, $n$ independent pairs detect a divergence $\delta$ from the reference with a type-II error of order $e^{-n\delta}$ at any fixed type-I error. Once the reference is estimated with an error of order $1/n$, every radius much larger than $1/n$ concerns departures that the sample could have detected, so it cannot be attributed to sampling noise.
+\end{remark}
+
+\section*{Part II. Applications to the evaluation problem}
+
+\section{The evaluation problem as a marginal problem}
+\label{sec:problem}
+A program evaluated through a lottery of its offer identifies, within cells of observable covariates, the law of the outcome under treatment and the law under control, and it leaves the joint law of the two potential outcomes of the same person unidentified. The share of people who end up worse off, the average loss of those who do, and any welfare measure that weights gains by a characteristic of the counterfactual are functionals of that joint law, so in the language of Part I they are payoffs $Z$ and the lottery identifies only the interval between $-H_\infty(-Z)$ and $H_\infty(Z)$, which on the benchmark below is very wide.
+
+The limit does not depend on the sample size, because every statistic of the observed data, which consist of covariates, the arm and the outcome in that arm, has the same law under every coupling of the two marginals, so no sample size discriminates between couplings and the error exponent of any test in the direction of the coupling is zero. The radius of Part I is therefore a robustness budget in the sense of Hansen and Sargent, a quantity that the evaluator declares and that the evaluation data can never estimate. The practical consequence is a reporting rule, under which an evaluation states its claims under declared references and reports the radius at which each claim breaks. Auxiliary data on earnings before the program can anchor a reference, as Section \ref{sec:calibration} shows, but only under an explicit assumption that carries persistence over time to persistence across regimes.
+
+\section{The synthetic benchmark}
+\label{sec:benchmark}
+The benchmark is the synthetic pilot of the policy paper. There are three cells, stable part-time employees, fixed-term workers and intermittent workers, with weights $0.40$, $0.35$ and $0.25$. Pre-tax earnings over two years without the program are uniform on intervals of width $12{,}000$, $18{,}000$ and $24{,}000$ euros centered at $24{,}000$, $18{,}000$ and $12{,}000$, and the program shifts the distribution by $2{,}000$, $1{,}500$ and $1{,}000$. A tax-free allowance of $2{,}000$ euros is paid to every assigned worker, earnings are taxed at 30\%, and a loser is a worker whose disposable income, after-tax earnings plus the allowance, falls below the after-tax earnings she would have had without the program.
+
+All amounts below are after-tax euros over two years, and in those units the outcome is uniform with widths $L_g$ equal to $8{,}400$, $12{,}600$ and $16{,}800$, the shifts $\Delta_g$ are $1{,}400$, $1{,}050$ and $700$, the transfer is $b=2{,}000$, and the threshold of Section \ref{sec:extremal} is $\sigma_g=(\Delta_g+b)/L_g$, equal to $0.4048$, $0.2421$ and $0.1607$. The references are the product and the mixture with $\kappa=0.10$. On the grid of 25 equiprobable midpoints per cell used for the computations that have no closed form, the divergence of the product from the mixture is $2.0858$, while on the continuum it is $\log(1/\kappa)=2.3026$, and the divergence in the opposite direction is infinite on the continuum because the rank component is singular with respect to the product. Radii are reported also as a share of this divergence. The share is only a reading aid, since the divergence is oriented and the two balls are not nested.
+
+\section{Losers under the declared references}
+\label{sec:losers}
+At the references the loss shares have closed forms, and under the product the share is $(1-\sigma_g)^2/2$, that is $17.7\%$, $28.7\%$ and $35.2\%$ in the three cells and $25.94\%$ overall. Under the mixture it is $\kappa$ times that, $2.59\%$ overall. Without restrictions, by Lemma \ref{lem:makarov}, it can reach $59.5\%$, $75.8\%$ and $83.9\%$, that is $71.32\%$ overall. Table \ref{tab:curves} reports the worst case as the radius grows, on the continuum and on the grid. The continuum values under the product come from Theorem \ref{thm:bridge}, those under the mixture from the fixed point of Proposition \ref{prop:reduction}, solved on a quadrature grid of 4,001 nodes for functions of one variable, together with the two brackets of Proposition \ref{prop:brackets}.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{rrrrrrrr}
+\toprule
+& \multicolumn{2}{c}{Product reference} & \multicolumn{5}{c}{Mixture reference, $\kappa=0.10$}\\
+\cmidrule(lr){2-3}\cmidrule(lr){4-8}
+$\delta$ & continuum & grid & lower bracket & continuum & upper bracket & grid & diagonal mass\\
+\midrule
+0 & 25.94 & 24.70 & 2.59 & 2.59 & 2.59 & 2.47 & 0.900\\
+0.01 & 29.84 & 28.56 & 3.82 & 4.46 & 5.13 & 4.30 & 0.870\\
+0.02 & 31.45 & 30.16 & 4.31 & 5.33 & 6.34 & 5.14 & 0.856\\
+0.05 & 34.63 & 33.32 & 5.22 & 7.18 & 8.98 & 6.95 & 0.826\\
+0.10 & 38.18 & 36.85 & 6.07 & 9.48 & 12.32 & 9.21 & 0.790\\
+0.20 & 43.08 & 41.72 & 6.82 & 13.08 & 17.60 & 12.72 & 0.735\\
+\bottomrule
+\end{tabular}
+\caption{Worst-case share of losers in percent, aggregated over the three cells with a global budget. The diagonal mass is the weighted share of workers whose rank the worst case leaves in place.}
+\label{tab:curves}
+\end{table}
+
+The grid understates every value by a few tenths of a point under the mixture and by more than one point under the product, because ties on a grid protect workers, and the breakdown radii move accordingly, so that under the mixture the claim that at most 10\% lose breaks at radius $0.1128$ on the continuum, $4.9\%$ of $\log(1/\kappa)$, against $0.1205$ on the grid, $5.8\%$ of the grid divergence. Under the product the claim fails at the reference itself, and the weaker claim that at most half lose breaks at $0.4125$, $17.9\%$ of $\log(1/\kappa)$, against $0.4687$ on the grid, $22.5\%$ of the grid divergence. With $\kappa=0.05$ the share at the mixture is $1.30\%$ and the 10\% claim survives up to $0.210$, $7.0\%$ of $\log20$, while with $\kappa=0.20$ the share is $5.19\%$ and the claim survives up to $0.034$, $2.1\%$ of $\log5$. The grid states the persistent claims as slightly more robust than they are, by an amount that leaves the qualitative picture unchanged.
+
+The diagonal mass tells how the adversary spends the budget. At radius $0.10$ the worst case leaves $79\%$ of the workers in place, against $90\%$ at the reference. Most of the budget goes into breaking persistence and only a minor part into reshuffling the share that the reference already reshuffles, and in fact the lower bracket, which allows only the second, recovers about two thirds of the worst case at that radius.
+
+Two incidence objects deserve to be kept apart, and the paper's Exhibit 2 reports the first. The shares by cell in the aggregate worst case are the cells of the plan that maximizes the aggregate share of losers under the global budget, so that they describe how the adversary distributes a single budget across cells. The separate worst case of a cell is the maximum of that cell's share when the whole budget may be spent there, which Lemma \ref{lem:percell} identifies with a cell problem at the conditional radius $\delta/\omega_g$. Table \ref{tab:incidence} reports both at radius $0.10$, where the separate maxima are larger in every cell and their weighted sum exceeds the aggregate worst case, which is what the lemma says, and in both objects the intermittent workers are the most exposed.
+
+\begin{table}[h]
+\centering\small
+\setlength{\tabcolsep}{4pt}\begin{tabular}{lrrrrrr}
+\toprule
+& \multicolumn{3}{c}{Mixture reference} & \multicolumn{3}{c}{Product reference}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+& Stable & Fixed-term & Interm. & Stable & Fixed-term & Interm.\\
+\midrule
+Cells in the aggregate worst case & 6.1 & 10.1 & 12.9 & 27.9 & 40.0 & 46.7\\
+Separate worst case of the cell & 11.7 & 15.9 & 21.4 & 34.9 & 48.0 & 58.1\\
+\bottomrule
+\end{tabular}
+\caption{Share of losers by cell in percent at radius $0.10$ on the grid of the paper. The aggregate worst case is $9.21\%$ under the mixture and $36.85\%$ under the product, while the weighted sums of the separate maxima are $15.6\%$ and $45.3\%$.}
+\label{tab:incidence}
+\end{table}
+
+The constants of Theorem \ref{thm:sandwich} for the loss indicator on the grid are $V_R=0.0744$ and $M_R=0.568$ under the product and $V_R=0.0139$ and $M_R=0.844$ under the mixture. Table \ref{tab:sandwich} compares the bounds with the exact worst case, and under the product the upper bound is within two percent of the exact value at the smallest radius and within sixteen percent at $\delta=0.10$. Under the mixture the exact value exceeds the leading term from $\delta=0.005$ onward, and the term $\delta M_R/3$ absorbs the excess, while the lower bound turns negative beyond the informative range $2V_R/M_R^2=0.039$. For the shortfall, in thousands of euros, the constants are $V_R=2.480$ and $M_R=5.69$ under the product and $V_R=0.500$ and $M_R=10.7$ under the mixture, with the same pattern. On the continuum, the projected variance of Corollary \ref{cor:bridge} is $0.0679$ in the first cell, and the ratio between $H(\theta)-H_0$ and $\sqrt{2\KL(\theta)V(\sigma)}$ is $1.0002$, $1.0006$, $1.0011$ and $1.0021$ at $\theta=0.02$, $0.05$, $0.10$ and $0.20$.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{rrrrrrr}
+\toprule
+& \multicolumn{3}{c}{Product reference} & \multicolumn{3}{c}{Mixture reference, $\kappa=0.10$}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+$\delta$ & lower & exact & upper & lower & exact & upper\\
+\midrule
+0.001 & 0.0116 & 0.0122 & 0.0124 & 0.0044 & 0.0054 & 0.0055\\
+0.002 & 0.0161 & 0.0173 & 0.0176 & 0.0058 & 0.0078 & 0.0080\\
+0.005 & 0.0244 & 0.0273 & 0.0282 & 0.0075 & 0.0126 & 0.0132\\
+0.01 & 0.0329 & 0.0386 & 0.0405 & 0.0082 & 0.0183 & 0.0195\\
+0.02 & 0.0432 & 0.0546 & 0.0583 & 0.0067 & 0.0267 & 0.0292\\
+0.05 & 0.0578 & 0.0862 & 0.0957 & $-0.0050$ & 0.0449 & 0.0513\\
+0.10 & 0.0652 & 0.1215 & 0.1409 & $-0.0318$ & 0.0674 & 0.0808\\
+\bottomrule
+\end{tabular}
+\caption{The sandwich of Theorem \ref{thm:sandwich} for the loss indicator, $H_\delta-H_0$ on the 25-point grid with a global budget. Exact values from the certified scaling.}
+\label{tab:sandwich}
+\end{table}
+
+The two adversaries of Proposition \ref{prop:adversaries} are far apart, since without restrictions the countermonotone coupling gives an expected shortfall of $1{,}671$ euros per person on the continuum, where $35.7\%$ of the workers lose $4{,}685$ euros each on average, and $1{,}666$ on the grid, where $33.8\%$ lose $4{,}930$ each, while the coupling that maximizes the count gives $67.6\%$ of losers on the grid with a shortfall of $319$ euros per person, that is $472$ per loser. At radius $0.10$ around the mixture the two maximizers give $9.2\%$ of losers with a shortfall of $248$ euros and $6.6\%$ of losers with a shortfall of $396$ euros. An evaluation that counts heads and one that counts euros look at different worst cases at every radius. At the references the average shortfall of a loser is $3{,}284$ euros on the continuum, the same under both references since the mixture scales count and shortfall by the same $\kappa$.
+
+For the welfare-weighted gain with rank weights $2(1-F_0)$, where $F_0$ is the pooled distribution function of the counterfactual, the weighted marginal value of public funds of the paper ranges from $0.66$ to $1.30$ across all couplings on the grid, while its unweighted counterpart is the single identified number $0.68$, and the remark at the end of Section \ref{sec:extremal} says that the two ends of the range are the countermonotone and the comonotone couplings.
+
+\section{Instruments in the benchmark}
+\label{sec:instruments}
+With a cap $\alpha=10\%$ in every cell, the floor of Proposition \ref{prop:floor} raises disposable income to $20{,}160$, $17{,}640$ and $15{,}120$ euros in the three cells. Its outlays are $2{,}258.67$, $4{,}201.75$ and $6{,}188.58$, with weighted mean $3{,}921.23$, and the bound on the residual loss is $42$, $63$ and $84$ euros, with weighted mean $59.85$. A constant transfer that delivers the same cap under every coupling costs $9{,}670.50$. By Corollary \ref{cor:frontier} the frontier is $9{,}670.50-5{,}985\,\bar\tau$ as long as no cell exhausts its transfer, which holds up to $\bar\tau=0.733$, and Table \ref{tab:frontier} reports it together with the worst expected residual loss of Proposition \ref{prop:severity}.
+
+\begin{table}[h]
+\centering\small
+\begin{tabular}{rrrrrr}
+\toprule
+$\bar\tau$ & Stable part-time & Fixed-term & Intermittent & Weighted outlay & Worst expected loss\\
+\midrule
+0 & 6{,}160.00 & 10{,}290.00 & 14{,}420.00 & 9{,}670.50 & 29.93\\
+0.35 & 4{,}690.00 & 8{,}085.00 & 11{,}480.00 & 7{,}575.75 & 36.27\\
+0.50 & 4{,}060.00 & 7{,}140.00 & 10{,}220.00 & 6{,}678.00 & 39.90\\
+0.70 & 3{,}220.00 & 5{,}880.00 & 8{,}540.00 & 5{,}481.00 & 46.04\\
+1 & 2{,}258.67 & 4{,}201.75 & 6{,}188.58 & 3{,}921.23 & 59.85\\
+\bottomrule
+\end{tabular}
+\caption{The unrestricted frontier of Theorem \ref{thm:minimal} with a 10\% cap in every cell, after-tax euros per person over two years. The last column is a maximum over couplings distinct from the maximum of the loss probability.}
+\label{tab:frontier}
+\end{table}
+
+At the $2{,}000$ euros per person that the paper spends, the 10\% cap is out of reach at every ceiling, since even the floor costs almost twice as much. What $2{,}000$ euros buy at $\bar\tau=1$ is given by Corollary \ref{cor:equal}, with $p=0.668$, so the floor to the 67th percentile caps the loss share at $33.2\%$ in every cell under every coupling, against $71.3\%$ for the flat allowance. At the references the floor leaves $24.16\%$ and $2.42\%$ of losers, against $25.94\%$ and $2.59\%$ for the allowance, and its worst expected residual loss is $660$ euros, against $1{,}671$ for the allowance. The price is an implicit marginal tax rate of 100\% below the threshold.
+
+On the grid the minimal intercept is $0.88L_g-\Delta_g$ in place of $0.90L_g-\Delta_g$, the worst-case share is 8\% in every cell, the floor costs $3{,}919.61$ and the constant transfer $9{,}431.10$. By Lemma \ref{lem:lifting} a grid certificate transfers to the continuum with a padding of at most $\sum_g\omega_gL_g/J=478.80$ euros.
+
+At a finite radius the pointwise optimality of Theorem \ref{thm:minimal} fails. Take the intermittent cell with $\bar\tau=0.50$, global radius $0.10$ and the mixture reference, which by Lemma \ref{lem:percell} is a cell problem at conditional radius $0.40$. The cheapest rule of the form \eqref{eq:minimal} with a free intercept costs $8{,}372.00$ euros, while the minimum of \eqref{eq:surface} over the whole class is $8{,}277.92$ up to a gap below one cent, attained by a rule with maximal slope everywhere except a flat step between the seventh and the eighth treated point. The cutting-plane scheme of Section \ref{sec:design} certifies a worst-case share of $0.0995$, and an independent implementation of the scaling gives $0.099479$. The computation was done in pre-tax units and rescaled, since the problem is homogeneous of degree one in the units and the divergence and the ceiling do not depend on them.
+
+\section{The fiscal externality of the top-up}
+\label{sec:externality}
+The paper's Exhibit 3 holds earnings fixed in every column, so the top-up and the allowance show the same marginal value of public funds. This section does the accounting that the paper only summarizes, in the framework of Hendren and Sprung-Keyser \cite{hendren}, and it says what moves and what does not when recipients respond to the top-up.
+
+The marginal value of public funds of a policy is the ratio between the beneficiaries' willingness to pay for it and its net cost to the government. For the allowance, willingness to pay per assigned worker is the after-tax earnings gain plus the transfer valued at face value, $(1-t)\Delta+b$, and the net cost is the program cost plus the transfer minus the tax on the gain, $C+b-t\Delta$, which gives $0.68$ at $C=3{,}000$ with $t=0.30$, $b=2{,}000$ and the pilot's $\Delta=1{,}529$. For the top-up, the transfer is $T(Y^1)=(q_g-(1-t)Y^1)_+$ in each cell, with $q_g$ the threshold on disposable income, and its expected outlay is $b$ by construction of the equal-outlay comparison, so at fixed earnings the two columns coincide.
+
+When recipients reduce their gross earnings in response, the envelope theorem says that a recipient who is choosing earnings optimally is indifferent at the margin between earning one euro more and one euro less, so the willingness to pay for the top-up is unchanged to first order and remains the mechanical transfer at baseline earnings, while the cost side moves, since a euro of gross earnings forgone by a recipient below the threshold raises the transfer by $1-t$, because the top-up is indexed to disposable income, and lowers the tax collected by $t$, so the net cost rises by exactly one euro. This is the fiscal externality, and it is the only channel through which the response enters. Writing $f$ for the gross earnings forgone per assigned worker, the marginal value of public funds of the top-up is
+\begin{equation}
+\mathrm{MVPF}(f)=\frac{(1-t)\Delta+b}{C+b-t\Delta+f},
+\end{equation}
+whose slope at $f=0$ is $-0.0146$ per €100 on the parameters of the paper. Recipients are the workers whose treated earnings fall below the threshold, a share $p-\Delta_g/L_g$ of each cell with $p=0.668$ the quantile of the threshold, that is $50.1\%$, $58.5\%$ and $62.6\%$ in the three cells and $56.2\%$ overall, with mean gross earnings of $23{,}008$, $15{,}762$ and $8{,}516$ euros. A proportional reduction of their earnings by $5\%$, $10\%$ or $15\%$ corresponds to $459$, $917$ or $1{,}376$ euros forgone per assigned worker and to a marginal value of public funds of $0.61$, $0.56$ or $0.52$.
+
+\comments The proportional reductions are illustrations, declared as the scenarios on the matching are declared, and theory does not say that the response is proportional, since below the threshold the private return to earning is zero, so the response of a recipient who can adjust freely is at the extensive margin, and a recipient who stops working altogether forgoes all of her gross earnings, which costs the government the whole amount. The size of the response is therefore the object that a second randomized arm offering the top-up would have to measure, and the allowance, which has no phase-out, carries income effects only. The evidence of Verlaat, Todeschini and Ramos \cite{verlaat} on a guaranteed income and of Hyman, Kovak and Leive \cite{hyman} on a wage insurance conditioned on employment, which the paper cites, shows that the sign depends on whether the transfer is conditioned on working.
+
+\section{Calibrating the reference with pre-program mobility}
+\label{sec:calibration}
+The mixture reference has a parameter $\kappa$ chosen for illustration. A better option is to estimate it from the earnings mobility observed in the same registers before the program. Every worker has earnings in the two years before the program, so within each cell the copula of consecutive earnings is identified. The assumption that anchors the reference is that the coupling of the two potential outcomes lies within the ball of radius $\delta$ around the mobility copula, which says that the program reshuffles ranks by at most $\delta$ beyond what a normal year does. Nothing in the evaluation can test this assumption, since by Section \ref{sec:problem} the observed data have the same law under every coupling. What we gain is a reference with an economic content and an observable counterpart, so that a reader who disputes it disputes a statement about earnings dynamics.
+
+Proposition \ref{prop:estimation} contains the practical lesson of this section, because with the cell sizes of the pilot and $J=25$, the expected estimation divergence of the empirical copula is $0.13$, $0.15$ and $0.21$ in the three cells, with weighted mean $0.156$, which is larger than the radius at which the 10\% claim breaks. A nonparametric reference on a grid fine enough for the evaluation is estimated with an error that the radius would have to absorb entirely. The one-parameter reference of Lemma \ref{lem:spearman} has an estimation divergence two orders of magnitude smaller.
+
+To check this, a synthetic panel of earnings in the two years before the program is drawn for the 6,000 workers of the pilot from the mixture with $\kappa=0.10$. The rank correlations are $0.909$, $0.917$ and $0.918$, so $\hat\kappa$ is $0.091$, $0.083$ and $0.082$, with weighted mean $0.086$. The divergence of the true reference from the parametric estimate is $0.0012$, while its divergence from the empirical copula is $0.176$, $0.136$ and $0.143$, with weighted mean $0.153$, close to the $0.156$ predicted by the proposition. Under the empirical copula the worst-case loss share on the grid is $2.65\%$ at the reference, $9.29\%$ at radius $0.10$ and $12.7\%$ at $0.20$, against $2.47\%$, $9.21\%$ and $12.7\%$ under the declared reference, and the breakdown of the 10\% claim moves from $0.1205$ to $0.1188$.
+
+After calibration the radius has a clear reading, because by the remark on detectability, with about two thousand transitions per cell every radius above a few thousandths would be detected if ordinary mobility were what the program inherits, so the radius cannot stand for sampling uncertainty about the reference, which the parametric estimate removes. It stands for the failure of transferability, the program reshuffling workers beyond what a normal year does. The calibration of Hansen and Sargent through detection-error probabilities applies to the panel and bounds the sampling part of the radius, while the structural part remains a judgment that the evaluation has to declare.
+
+The statistical part of the problem is still open, and only one piece of it is settled, since for the floor the order statistic of rank $693$ out of $750$ control earnings covers at least 90\% of the intermittent cell with probability $0.986$, so a threshold set at that order statistic keeps the cap with high probability at a fiscal premium that the treated marginal identifies. For the worst-case functionals, a coverage statement needs a joint confidence region for the marginals and a continuity result for $H_\delta$ in the marginals at a fixed reference structure, which I have not worked out yet.
+
+\section{Computations}
+\label{sec:computations}
+The closed forms of Sections \ref{sec:exact} and \ref{sec:design} are used wherever they exist. Everything else is computed on the grid of 25 midpoints per cell by the dual scaling of Proposition \ref{prop:dual}, with the multiplier found by a scalar root on the divergence constraint, the scaling iterated to a marginal residual of $10^{-11}$ in the exponential or in the logarithmic domain, and every value bracketed by the certificate of Proposition \ref{prop:certificates} and an admissible plan, while unrestricted values come from linear programs. The fixed point of Proposition \ref{prop:reduction} is solved with damped iteration in logarithms to a tolerance of $10^{-11}$ in the supremum norm, and three checks validate it, since at $\kappa=1$ it reproduces Theorem \ref{thm:bridge} to seven digits at $\theta=0.5$, $2$ and $5$. As $\theta\to0$ the loss share tends to $\kappa(1-\sigma)^2/2$. Against the scaling on grids of $200$, $400$ and $800$ points at $\kappa=0.10$ and $\sigma=0.4048$ the grid values approach it at rate $1/J$, with loss shares $0.08165$, $0.08134$ and $0.08118$ against $0.08108$ at $\theta=3$, and $0.18034$, $0.17958$ and $0.17920$ against $0.17897$ at $\theta=5$. The closed form of Theorem \ref{thm:bridge} agrees with the scaling on a 600-point grid to $4\cdot10^{-4}$ in the loss share and to $10^{-5}$ in the divergence. One detail of the constrained solver deserves a record, because an earlier version of the solver got it wrong. When the divergence of the scaling solution at the smallest multiplier tried falls below the radius, the unrestricted plan of the linear program is admissible only if its own divergence is below the radius, which is not guaranteed and is now checked, so that when the unrestricted plan is not admissible the multiplier is searched downward with a tighter convergence requirement, and when the scaling fails to converge in that region, which happens near the unrestricted boundary, the solver returns the convex combination of the last converged plan and the unrestricted plan that saturates the radius. The combination is admissible by convexity of the divergence and its value is within a certified gap of the unrestricted value, below one euro on every case met here. No number of the paper was affected, and the only changes were in uncited entries of the weighted welfare measure, at the fourth decimal.
+
+The scripts that produce every number of these notes are deterministic and rerun from scratch in a few minutes, and they sit in the same repository as the paper. \texttt{sandwich.py} computes the constants and the table of Section \ref{sec:losers}, \texttt{bridge.py} the closed forms of Section \ref{sec:exact}, \texttt{persistent\_bridge.py} the fixed point and the brackets of Section \ref{sec:mixture}, \texttt{incidence.py} the two incidence objects of Table \ref{tab:incidence}, \texttt{panel.py} and \texttt{mobility.py} the synthetic panel and the calibration of Section \ref{sec:calibration}, and each writes its results to a file that the text cites.
+
+\section{Open directions}
+\label{sec:open}
+Three directions are within reach, and each is recorded here together with what has been established and what remains to be proved.
+
+The first is the extension of Theorem \ref{thm:bridge} beyond uniform marginals. Mapping each outcome to its rank, $u=F_0(Y^0)$ and $v=F_1(Y^1)$, makes both marginals uniform, leaves the divergence from the product reference unchanged, and turns the loss event into $v<h(u)$ with $h(u)=F_1(F_0^{-1}(u)-b)$, a nondecreasing curve that is the straight line $u-\sigma$ only when the treated quantile function is a rank shift of the control one, as for uniforms of equal width. Repeating the proof of Theorem \ref{thm:bridge} with $f(u)=F_v(h(u))$ and $g(u)=\bar u-F_u(u)$, the product $(\bar v+cf)(\bar u+cg)$ has derivative $c(h'(u)-1)$, a known function, so it equals $P_0+c[h(u)-u]$ up to a constant and both equations stay linear with explicit coefficients. The bridge under the product reference is therefore solvable by quadratures for any pair of continuous marginals, with two outer regions when $h$ reaches $0$ or $1$ inside the unit interval and a scalar closure. An atom at zero earnings, the case the paper lists among its limitations, does not break this structure when $b>0$, since a control worker with zero counterfactual earnings cannot lose and a treated worker with zero earnings loses on the whole active range, so the atoms enter only as boundary constants. For the mixture reference the reduction of Proposition \ref{prop:reduction} needs the payoff to vanish on the diagonal, that is $h(u)\le u$ for every $u$, which holds for the benchmark and fails when the program compresses high earnings by more than the allowance.
+
+The second is the contraction of the map in \eqref{eq:fixedpoint}. The natural metric is the one of Thompson, $\|\log\eta-\log\eta'\|_\infty$, which is also the norm in which the iteration is monitored, and two facts are already in hand, since the outer step $q\mapsto 2/(1+\sqrt{1+4q})$ has a logarithmic elasticity equal to $-(s-1)/(2s)$ with $s=\sqrt{1+4q}$, so it contracts the Thompson distance by a factor below $1/2$. The inner map $\eta\mapsto q_\eta$ is homogeneous of degree $-1$, because scaling $\eta$ scales the bridge and hence the product of its potentials by the same factor, so its Lipschitz constant is exactly one along the direction of scale and $1+O(c)$ in general as $\theta\to0$, which already gives a contraction for small multipliers. For every multiplier the question reduces to one lemma, namely that $\eta\mapsto q_\eta$ reverses the order, since then the composed map preserves the order and is subhomogeneous with exponent below $1/2$, and the results of Nussbaum \cite{nussbaum} and Krause \cite{krause} on such maps give the contraction directly.
+
+The third direction is inference, because the identified set at a fixed radius is a functional of the two marginals, which the pilot estimates, and a coverage statement needs a continuity result for $H_\delta$ in the marginals at a fixed reference structure together with a joint confidence region for the marginals. The order-statistic bound of Section \ref{sec:calibration} is the one piece that is already available.
+
+\section{Notes on the literature}
+\label{sec:literature}
+The objects used here have a long history, which begins when Schrödinger \cite{schrodinger} asked for the most likely evolution of a cloud of particles between two observed marginals and found a reweighting of a reference law by a product of two potentials. The iterative proportional fitting of Deming and Stephan \cite{demingstephan} and the scaling theorem of Sinkhorn \cite{sinkhorn} compute that reweighting on finite supports, and Csiszár \cite{csiszar} identified it as the information projection of the reference onto the set of laws with the given marginals. Léonard \cite{leonard} connected the static and dynamic Schrödinger problems to optimal transport, and Cuturi \cite{cuturi} made entropic regularization the standard numerical tool of transport. On the decision side, Hansen and Sargent \cite{hansensargent2001,hansensargent2008} specified model uncertainty as a relative entropy ball around a reference and showed that the worst case is an exponential tilt priced by a multiplier, and Galichon and Henry \cite{galichonhenry} brought transport with fixed marginals into econometric practice. The evaluation problem sits at the intersection, a coupling with fixed marginals restricted by relative entropy from a reference.
+
+On the evaluation side, the bounds from the marginals alone go back to Makarov \cite{makarov} and were developed for treatment effects by Heckman, Smith and Clements \cite{heckman} and Fan and Park \cite{fanpark}, and Kaji and Cao \cite{kajicao} study what subgroups add. Christensen and Connault \cite{christensenconnault} develop sensitivity analysis of counterfactuals over divergence neighborhoods of a reference distribution, which is the closest econometric framework to the one used here, and Masten and Poirier \cite{mastenpoirier} formalize breakdown frontiers.
+
+A parallel literature in quantitative risk management bounds functionals of a joint law whose copula is known to lie near a reference. Glasserman and Xu \cite{glassermanxu} bound risk measures over the models within a relative entropy distance of a reference without fixing the marginals. Embrechts, Puccetti and Rüschendorf \cite{embrechts} compute bounds at fixed marginals with the rearrangement algorithm, which Bernard and Vanduffel \cite{bernardvanduffel} extend to a trusted region where the copula is known. Lux and Papapantoleon \cite{luxpapapantoleon} obtain explicit improved Fréchet-Hoeffding bounds for copulas in a neighborhood of a reference measured by distances such as the Kolmogorov-Smirnov distance, and Bartl, Kupper, Lux, Papapantoleon and Eckstein \cite{bartl} establish the transport duality for these classes with an explicit dual solution for indicators of rectangles. Those explicit bounds need distances that are continuous under pointwise convergence of copulas and monotone in the orthant order, and the relative entropy, defined on densities and only lower semicontinuous, does not belong to that class.
+
+Closed forms in entropic transport are rare, and the two that exist are Gaussian, since Janati, Muzellec, Peyré and Cuturi \cite{janati} solve the Gaussian case for product references by solving the fixed-point equation behind the scaling algorithm, and Freulon, Georgakis and Panaretos \cite{freulon} reduce the Gaussian case with references that are not products to an optimization over matrices. The duality for divergence-constrained problems used in Section \ref{sec:sandwich} is in Hu and Hong \cite{huhong}, Bernstein's inequality in the form used there is in Boucheron, Lugosi and Massart \cite{blm}, and the extremal couplings for convex functions of a difference are due to Cambanis, Simons and Stout \cite{cambanis}.
+
+\begin{thebibliography}{99}\small
+\bibitem{bartl} Bartl, D., M. Kupper, T. Lux, A. Papapantoleon and S. Eckstein (2018). \emph{Marginal and dependence uncertainty: bounds, optimal transport, and sharpness}. arXiv:1709.00641, version 2.
+\bibitem{bellenzennaro} Bellen, A. and M. Zennaro (2003). \emph{Numerical Methods for Delay Differential Equations}. Oxford University Press.
+\bibitem{bernardvanduffel} Bernard, C. and S. Vanduffel (2015). A new approach to assessing model risk in high dimensions. \emph{Journal of Banking and Finance}, 58, 166-178.
+\bibitem{blm} Boucheron, S., G. Lugosi and P. Massart (2013). \emph{Concentration Inequalities: A Nonasymptotic Theory of Independence}. Oxford University Press.
+\bibitem{cambanis} Cambanis, S., G. Simons and W. Stout (1976). Inequalities for $\mathcal Ek(X,Y)$ when the marginals are fixed. \emph{Zeitschrift für Wahrscheinlichkeitstheorie und verwandte Gebiete}, 36(4), 285-294.
+\bibitem{christensenconnault} Christensen, T. and B. Connault (2023). Counterfactual sensitivity and robustness. \emph{Econometrica}, 91(1), 263-298.
+\bibitem{csiszar} Csiszár, I. (1975). $I$-divergence geometry of probability distributions and minimization problems. \emph{Annals of Probability}, 3(1), 146-158.
+\bibitem{cuturi} Cuturi, M. (2013). Sinkhorn distances: lightspeed computation of optimal transport. \emph{Advances in Neural Information Processing Systems}, 26, 2292-2300.
+\bibitem{demingstephan} Deming, W. E. and F. F. Stephan (1940). On a least squares adjustment of a sampled frequency table when the expected marginal totals are known. \emph{Annals of Mathematical Statistics}, 11(4), 427-444.
+\bibitem{donskervaradhan} Donsker, M. D. and S. R. S. Varadhan (1975). Asymptotic evaluation of certain Markov process expectations for large time, I. \emph{Communications on Pure and Applied Mathematics}, 28(1), 1-47.
+\bibitem{embrechts} Embrechts, P., G. Puccetti and L. Rüschendorf (2013). Model uncertainty and VaR aggregation. \emph{Journal of Banking and Finance}, 37(8), 2750-2764.
+\bibitem{fanpark} Fan, Y. and S. S. Park (2010). Sharp bounds on the distribution of treatment effects and their statistical inference. \emph{Econometric Theory}, 26(3), 931-951.
+\bibitem{freulon} Freulon, P., N. Georgakis and V. Panaretos (2025). \emph{Entropic optimal transport beyond product reference couplings: the Gaussian case on Euclidean space}. arXiv:2507.01709.
+\bibitem{galichonhenry} Galichon, A. and M. Henry (2026). \emph{An econometrician's guide to optimal transport}. arXiv:2604.04227, version 2.
+\bibitem{glassermanxu} Glasserman, P. and X. Xu (2014). Robust risk measurement and model risk. \emph{Quantitative Finance}, 14(1), 29-58.
+\bibitem{hansensargent2001} Hansen, L. P. and T. J. Sargent (2001). Robust control and model uncertainty. \emph{American Economic Review}, 91(2), 60-66.
+\bibitem{hansensargent2008} Hansen, L. P. and T. J. Sargent (2008). \emph{Robustness}. Princeton University Press.
+\bibitem{heckman} Heckman, J. J., J. Smith and N. Clements (1997). Making the most out of programme evaluations and social experiments: accounting for heterogeneity in programme impacts. \emph{Review of Economic Studies}, 64(4), 487-535.
+\bibitem{hendren} Hendren, N. and B. Sprung-Keyser (2020). A unified welfare analysis of government policies. \emph{Quarterly Journal of Economics}, 135(3), 1209-1318.
+\bibitem{huhong} Hu, Z. and L. J. Hong (2013). Kullback-Leibler divergence constrained distributionally robust optimization. Working paper, Optimization Online.
+\bibitem{hyman} Hyman, B. G., B. K. Kovak and A. Leive (2024). \emph{Wage insurance for displaced workers}. NBER Working Paper 32464.
+\bibitem{janati} Janati, H., B. Muzellec, G. Peyré and M. Cuturi (2020). Entropic optimal transport between unbalanced Gaussian measures has a closed form. \emph{Advances in Neural Information Processing Systems}, 33, 10468-10479.
+\bibitem{kajicao} Kaji, T. and J. Cao (2023). \emph{Assessing heterogeneity of treatment effects}. arXiv:2306.15048, version 4.
+\bibitem{krause} Krause, U. (2015). \emph{Positive Dynamical Systems in Discrete Time}. De Gruyter.
+\bibitem{leonard} Léonard, C. (2014). A survey of the Schrödinger problem and some of its connections with optimal transport. \emph{Discrete and Continuous Dynamical Systems}, 34(4), 1533-1574.
+\bibitem{luxpapapantoleon} Lux, T. and A. Papapantoleon (2019). Model-free bounds on Value-at-Risk using extreme value information and statistical distances. \emph{Insurance: Mathematics and Economics}, 86, 73-83.
+\bibitem{makarov} Makarov, G. D. (1981). Estimates for the distribution function of a sum of two random variables when the marginal distributions are fixed. \emph{Theory of Probability and its Applications}, 26(4), 803-806.
+\bibitem{mastenpoirier} Masten, M. A. and A. Poirier (2020). Inference on breakdown frontiers. \emph{Quantitative Economics}, 11(1), 41-111.
+\bibitem{nussbaum} Nussbaum, R. D. (1988). Hilbert's projective metric and iterated nonlinear maps. \emph{Memoirs of the American Mathematical Society}, 75(391).
+\bibitem{schrodinger} Schrödinger, E. (1931). Über die Umkehrung der Naturgesetze. \emph{Sitzungsberichte der Preussischen Akademie der Wissenschaften, Physikalisch-mathematische Klasse}, 144-153.
+\bibitem{sinkhorn} Sinkhorn, R. (1964). A relationship between arbitrary positive matrices and doubly stochastic matrices. \emph{Annals of Mathematical Statistics}, 35(2), 876-879.
+\bibitem{verlaat} Verlaat, T., F. Todeschini and X. Ramos (2025). The employment effects of a means-tested guaranteed income policy. \emph{Journal of Public Economics}, 105420.
+\end{thebibliography}
+\end{document}
